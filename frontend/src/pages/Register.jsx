@@ -24,6 +24,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { ApolloNavbar } from '../components/ApolloNavbar';
+import { useLanguage } from '../context/LanguageContext';
 import '../styles/LandingPage.css';
 
 const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
@@ -48,6 +49,7 @@ const COMMON_CONDITIONS = [
 ];
 
 export const Register = () => {
+  const { t, isHindi } = useLanguage();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const initialEmail = queryParams.get('email') || '';
@@ -373,12 +375,12 @@ export const Register = () => {
               <Activity className="apollo-logo-mark" size={26} />
             </div>
             <h2 className="apollo-auth-title">
-              Create your <span className="kindsight-italic-spark">account</span>
+              {t('auth.create_account')} <span className="kindsight-italic-spark">{t('auth.create_account_highlight')}</span>
             </h2>
             <p className="apollo-auth-subtitle">
-              {currentStep === 1 && 'Join the intelligent clinical triage and hospital resource routing grid'}
-              {currentStep === 2 && 'Provide essential clinical indicators to configure your digital health passport'}
-              {currentStep === 3 && 'Enter prior diagnostic reports or lab tests to seed your longitudinal health record'}
+              {currentStep === 1 && (isHindi ? 'बुद्धिमान क्लिनिकल ट्राइएज और अस्पताल संसाधन ग्रिड से जुड़ें' : 'Join the intelligent clinical triage and hospital resource routing grid')}
+              {currentStep === 2 && (isHindi ? 'अपना डिजिटल स्वास्थ्य पासपोर्ट कॉन्फ़िगर करने के लिए बुनियादी क्लिनिकल जानकारी दर्ज करें' : 'Provide essential clinical indicators to configure your digital health passport')}
+              {currentStep === 3 && (isHindi ? 'अपना अनुदैर्ध्य स्वास्थ्य रिकॉर्ड तैयार करने के लिए पूर्व रिपोर्ट दर्ज करें' : 'Enter prior diagnostic reports or lab tests to seed your longitudinal health record')}
             </p>
           </div>
 
@@ -392,7 +394,7 @@ export const Register = () => {
                 <div className="apollo-wizard-badge">
                   {currentStep > 1 ? <Check size={12} /> : '1'}
                 </div>
-                <span>Account</span>
+                <span>{isHindi ? 'खाता' : 'Account'}</span>
               </div>
               <div className="apollo-wizard-divider" />
               <div
@@ -404,7 +406,7 @@ export const Register = () => {
                 <div className="apollo-wizard-badge">
                   {currentStep > 2 ? <Check size={12} /> : '2'}
                 </div>
-                <span>Health Profile</span>
+                <span>{isHindi ? 'स्वास्थ्य प्रोफ़ाइल' : 'Health Profile'}</span>
               </div>
               <div className="apollo-wizard-divider" />
               <div
@@ -414,7 +416,7 @@ export const Register = () => {
                 }}
               >
                 <div className="apollo-wizard-badge">3</div>
-                <span>Medical Reports</span>
+                <span>{isHindi ? 'मेडिकल रिपोर्ट्स' : 'Medical Reports'}</span>
               </div>
             </div>
           )}
@@ -458,10 +460,10 @@ export const Register = () => {
                   className="apollo-auth-oauth-btn"
                   onClick={() => {
                     setAccountData({
-                      email: 'marcus.admin@hospital.org',
+                      email: 'rohan.sharma@gmail.com',
                       password: 'Password123!',
-                      full_name: 'Marcus Sterling',
-                      role: 'facility_manager',
+                      full_name: 'Rohan Sharma',
+                      role: 'patient',
                     });
                   }}
                 >
@@ -473,18 +475,18 @@ export const Register = () => {
               </div>
 
               <div className="apollo-auth-divider">
-                <span>or register with personal details</span>
+                <span>{isHindi ? 'या व्यक्तिगत विवरण के साथ पंजीकरण करें' : 'or register with personal details'}</span>
               </div>
 
               <div className="apollo-auth-field">
-                <label className="apollo-auth-label">Full Name</label>
+                <label className="apollo-auth-label">{t('auth.full_name_label')}</label>
                 <div className="apollo-auth-input-wrapper">
                   <input
                     type="text"
                     name="full_name"
                     required
                     className="apollo-auth-input"
-                    placeholder="e.g. Rohan Sharma"
+                    placeholder={t('auth.full_name_placeholder')}
                     value={accountData.full_name}
                     onChange={handleAccountChange}
                   />
@@ -493,14 +495,14 @@ export const Register = () => {
               </div>
 
               <div className="apollo-auth-field">
-                <label className="apollo-auth-label">Email Address</label>
+                <label className="apollo-auth-label">{t('auth.email_label')}</label>
                 <div className="apollo-auth-input-wrapper">
                   <input
                     type="email"
                     name="email"
                     required
                     className="apollo-auth-input"
-                    placeholder="rohan.sharma@example.com"
+                    placeholder={t('auth.email_placeholder')}
                     value={accountData.email}
                     onChange={handleAccountChange}
                   />
@@ -510,7 +512,7 @@ export const Register = () => {
 
               <div className="apollo-auth-row">
                 <div className="apollo-auth-field">
-                  <label className="apollo-auth-label">Role in Health Grid</label>
+                  <label className="apollo-auth-label">{t('auth.role_label')}</label>
                   <div className="apollo-auth-input-wrapper">
                     <select
                       name="role"
@@ -518,26 +520,26 @@ export const Register = () => {
                       value={accountData.role}
                       onChange={handleAccountChange}
                     >
-                      <option value="patient">Patient Account</option>
-                      <option value="doctor">Doctor / Attending Physician</option>
-                      <option value="nurse">Triage Nurse Specialist</option>
-                      <option value="paramedic">Paramedic / EMS Dispatcher</option>
-                      <option value="facility_manager">Hospital Bed / Capacity Manager</option>
-                      <option value="admin">Grid System Administrator</option>
+                      <option value="patient">{isHindi ? 'मरीज / नागरिक खाता' : 'Patient Account'}</option>
+                      <option value="doctor">{isHindi ? 'डॉक्टर / उपस्थित चिकित्सक' : 'Doctor / Attending Physician'}</option>
+                      <option value="nurse">{isHindi ? 'ट्राइएज नर्स विशेषज्ञ' : 'Triage Nurse Specialist'}</option>
+                      <option value="paramedic">{isHindi ? 'पैरामेडिक / ईएमएस डिस्पैचर' : 'Paramedic / EMS Dispatcher'}</option>
+                      <option value="facility_manager">{isHindi ? 'अस्पताल बेड / क्षमता प्रबंधक' : 'Hospital Bed / Capacity Manager'}</option>
+                      <option value="admin">{isHindi ? 'ग्रिड सिस्टम व्यवस्थापक' : 'Grid System Administrator'}</option>
                     </select>
                     <ShieldCheck size={18} className="apollo-auth-input-icon" />
                   </div>
                 </div>
 
                 <div className="apollo-auth-field">
-                  <label className="apollo-auth-label">Password</label>
+                  <label className="apollo-auth-label">{t('auth.password_label')}</label>
                   <div className="apollo-auth-input-wrapper">
                     <input
                       type="password"
                       name="password"
                       required
                       className="apollo-auth-input"
-                      placeholder="Minimum 6 characters"
+                      placeholder={isHindi ? 'न्यूनतम 6 अक्षर' : 'Minimum 6 characters'}
                       value={accountData.password}
                       onChange={handleAccountChange}
                     />
@@ -548,7 +550,7 @@ export const Register = () => {
 
               {accountData.role === 'patient' ? (
                 <button type="submit" className="apollo-auth-submit-btn">
-                  Continue to Health Profile
+                  {isHindi ? 'स्वास्थ्य प्रोफ़ाइल पर आगे बढ़ें' : 'Continue to Health Profile'}
                   <ArrowRight size={17} />
                 </button>
               ) : (
@@ -557,7 +559,7 @@ export const Register = () => {
                   disabled={loading}
                   className="apollo-auth-submit-btn"
                 >
-                  {loading ? 'Creating Staff Account...' : 'Complete Sign Up'}
+                  {loading ? (isHindi ? 'खाता बनाया जा रहा है...' : 'Creating Staff Account...') : (isHindi ? 'पंजीकरण पूरा करें' : 'Complete Sign Up')}
                   <ArrowRight size={17} />
                 </button>
               )}

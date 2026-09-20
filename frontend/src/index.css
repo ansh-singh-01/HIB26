@@ -520,3 +520,96 @@ td {
 tr:hover td {
   background: rgba(250, 245, 241, 0.6);
 }
+
+/* ==========================================================================
+   Language Toggle Component (Bilingual English & Hindi)
+   ========================================================================== */
+.mediconnect-lang-toggle-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(14, 15, 10, 0.05);
+  border: 1px solid rgba(14, 15, 10, 0.14);
+  border-radius: 50px;
+  padding: 3px 4px 3px 8px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.mediconnect-lang-toggle-group:hover {
+  background: rgba(14, 15, 10, 0.08);
+  border-color: rgba(14, 15, 10, 0.22);
+}
+
+.mediconnect-lang-globe-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--color-ink-black);
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.75;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  line-height: 1;
+}
+
+.mediconnect-lang-globe-icon:hover {
+  opacity: 1;
+  transform: rotate(15deg);
+}
+
+.mediconnect-lang-pills {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.mediconnect-lang-btn {
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 16px;
+  color: var(--color-ink-black);
+  opacity: 0.72;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  line-height: 1.2;
+}
+
+.mediconnect-lang-btn:hover {
+  opacity: 1;
+  background: rgba(14, 15, 10, 0.06);
+}
+
+.mediconnect-lang-btn.active {
+  background: var(--color-olive-grove);
+  color: var(--color-chartreuse-spark);
+  opacity: 1;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.mediconnect-lang-divider {
+  font-size: 0.72rem;
+  color: rgba(14, 15, 10, 0.25);
+  margin: 0 1px;
+  user-select: none;
+}
+
+/* Compact version for constrained spaces */
+.mediconnect-lang-toggle-group.compact {
+  padding: 2px 3px 2px 6px;
+  gap: 3px;
+}
+
+.mediconnect-lang-toggle-group.compact .mediconnect-lang-btn {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+}

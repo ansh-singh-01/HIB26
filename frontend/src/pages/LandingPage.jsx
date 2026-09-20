@@ -25,10 +25,12 @@ import {
   FileText
 } from 'lucide-react';
 import { ApolloNavbar } from '../components/ApolloNavbar';
+import { useLanguage } from '../context/LanguageContext';
 import '../styles/LandingPage.css';
 
 
 export const LandingPage = () => {
+  const { t, isHindi } = useLanguage();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [activeTab, setActiveTab] = useState(0);
@@ -105,32 +107,59 @@ export const LandingPage = () => {
     }
   ];
 
-  const faqs = [
-    {
-      q: 'How does MediConnect ensure patient safety with AI triage?',
-      a: 'MediConnect employs a dual-layer safety architecture. Critical physiologic rule thresholds (such as SpO2 < 90%, extreme tachycardia, or acute chest trauma) immediately trigger hard-coded clinical emergency overrides. Secondary non-critical assessments utilize fine-tuned clinical LLMs (Gemini 1.5) with transparent rationale explanations.'
-    },
-    {
-      q: 'Does MediConnect integrate with our hospital existing EHR system?',
-      a: 'Yes. MediConnect natively supports HL7 FHIR standards, Epic Systems, Cerner/Oracle Health, and custom REST/WebSocket feeds. Data bidirectional synchronization ensures referrals and vitals automatically link with patient master indexes.'
-    },
-    {
-      q: 'How does the dynamic hospital bed routing work in real time?',
-      a: 'Hospitals broadcast live capacity updates for ICU, general wards, ventilators, and emergency bays via our lightweight API or automated dispatch HUD. When an incoming triage assessment matches acuity criteria, the algorithm scores facilities based on real-time transit distance, bed availability, and specialty capability.'
-    },
-    {
-      q: 'What wearable devices and IoT telemetry sensors are supported?',
-      a: 'We support Bluetooth LE (BLE), cellular IoT monitors, smartwatch health telemetry, and standard clinical bedside monitors via MQTT and WebSockets. Telemetry feeds track SpO2, heart rate, non-invasive blood pressure, and core body temperature.'
-    },
-    {
-      q: 'Is MediConnect HIPAA and SOC2 Type II compliant?',
-      a: 'Absolutely. All patient identifiable data is encrypted at rest using AES-256 and in transit via TLS 1.3. We enforce strict role-based access controls (RBAC) across Patients, Triage Nurses, Doctors, and Hospital Admins, complete with immutable audit logs.'
-    },
-    {
-      q: 'Can regional health authorities deploy MediConnect across multiple independent clinics?',
-      a: 'Yes. MediConnect is designed from the ground up for multi-facility health grids, permitting independent hospitals, rural satellite clinics, and emergency ambulance fleets to federate on a single coordinated grid.'
-    }
-  ];
+  const faqs = isHindi
+    ? [
+        {
+          q: 'मेडीकनेक्ट एआई ट्राइएज के साथ मरीज की सुरक्षा कैसे सुनिश्चित करता है?',
+          a: 'मेडीकनेक्ट दोहरी-परत सुरक्षा तकनीक का उपयोग करता है। गंभीर शारीरिक मानदंड (जैसे SpO2 < 90%, तीव्र हृदय गति, या सीने में तेज दर्द) तुरंत आपातकालीन प्रोटोकॉल सक्रिय करते हैं। सामान्य गैर-गंभीर स्थितियों में पारदर्शी व्याख्या के साथ क्लिनिकल भाषा मॉडल का उपयोग होता है।'
+        },
+        {
+          q: 'क्या मेडीकनेक्ट अस्पताल के मौजूदा ईएचआर सिस्टम से जुड़ सकता है?',
+          a: 'हाँ, मेडीकनेक्ट स्वाभाविक रूप से HL7 FHIR मानकों, Epic, Cerner और कस्टम REST/WebSocket एपीआई का समर्थन करता है। द्वि-दिशात्मक डेटा समन्वयन यह सुनिश्चित करता है कि रेफरल और विटल्स स्वचालित रूप से अपडेट हों।'
+        },
+        {
+          q: 'रीयल-टाइम में गतिशील अस्पताल बेड रूटिंग कैसे काम करती है?',
+          a: 'अस्पताल सीधे आईसीयू, जनरल वार्ड और वेंटिलेटर की क्षमता लाइव प्रसारित करते हैं। जब किसी मरीज का ट्राइएज स्कोर उच्च होता है, तो एल्गोरिदम निकटतम दूरी, बेड उपलब्धता और विशेषज्ञता के आधार पर सबसे उपयुक्त अस्पताल चुनता है।'
+        },
+        {
+          q: 'क्या मरीज का डेटा ABDM और DPDP अधिनियम के तहत सुरक्षित है?',
+          a: 'बिल्कुल। सभी स्वास्थ्य डेटा 256-बिट एईएस से एन्क्रिप्टेड है और मरीज की डिजिटल सहमति के बिना किसी के साथ साझा नहीं किया जाता। यह आयुष्मान भारत डिजिटल मिशन (ABDM) और भारतीय डेटा संरक्षण अधिनियम के पूर्णतः अनुरूप है।'
+        },
+        {
+          q: 'क्या मेडीकनेक्ट क्षेत्रीय भाषाओं में उपलब्ध है?',
+          a: 'हाँ! मेडीकनेक्ट पूरे भारत के लिए सुलभ बनाया गया है, जिसमें एक क्लिक में अंग्रेजी और हिन्दी के बीच स्विच करने की सुविधा उपलब्ध है।'
+        },
+        {
+          q: 'क्या मेडीकनेक्ट को कई स्वतंत्र क्लीनिकों और अस्पतालों में तैनात किया जा सकता है?',
+          a: 'हाँ, मेडीकनेक्ट को बहु-सुविधा स्वास्थ्य ग्रिड के रूप में बनाया गया है, जिससे सरकारी और निजी अस्पताल, प्राथमिक स्वास्थ्य केंद्र (PHC), और एम्बुलेंस नेटवर्क एक साथ मिलकर काम कर सकते हैं।'
+        }
+      ]
+    : [
+        {
+          q: 'How does MediConnect ensure patient safety with AI triage?',
+          a: 'MediConnect employs a dual-layer safety architecture. Critical physiologic rule thresholds (such as SpO2 < 90%, extreme tachycardia, or acute chest trauma) immediately trigger hard-coded clinical emergency overrides. Secondary non-critical assessments utilize fine-tuned clinical LLMs with transparent rationale explanations.'
+        },
+        {
+          q: 'Does MediConnect integrate with our hospital existing EHR system?',
+          a: 'Yes. MediConnect natively supports HL7 FHIR standards, Epic Systems, Cerner/Oracle Health, and custom REST/WebSocket feeds. Data bidirectional synchronization ensures referrals and vitals automatically link with patient master indexes.'
+        },
+        {
+          q: 'How does the dynamic hospital bed routing work in real time?',
+          a: 'Hospitals broadcast live capacity updates for ICU, general wards, ventilators, and emergency bays via our lightweight API or automated dispatch HUD. When an incoming triage assessment matches acuity criteria, the algorithm scores facilities based on real-time transit distance, bed availability, and specialty capability.'
+        },
+        {
+          q: 'What wearable devices and IoT telemetry sensors are supported?',
+          a: 'We support Bluetooth LE (BLE), cellular IoT monitors, smartwatch health telemetry, and standard clinical bedside monitors via MQTT and WebSockets. Telemetry feeds track SpO2, heart rate, non-invasive blood pressure, and core body temperature.'
+        },
+        {
+          q: 'Is MediConnect compliant with ABDM & DPDP privacy acts?',
+          a: 'Absolutely. All patient identifiable data is encrypted at rest using AES-256 and in transit via TLS 1.3. We enforce strict role-based access controls (RBAC) across Patients, Triage Nurses, Doctors, and Hospital Admins, complete with immutable audit logs.'
+        },
+        {
+          q: 'Can regional health authorities deploy MediConnect across multiple independent clinics?',
+          a: 'Yes. MediConnect is designed from the ground up for multi-facility health grids, permitting independent hospitals, rural satellite clinics, and emergency ambulance fleets to federate on a single coordinated grid.'
+        }
+      ];
 
   return (
     <div className="apollo-landing">
@@ -138,8 +167,14 @@ export const LandingPage = () => {
           0. Promotional Announcement Strip (Kindsight Style)
           =================================================================== */}
       <div className="kindsight-top-strip">
-        <span className="kindsight-strip-badge">2026 Grid Release</span>
-        <span>Regional AI triage telemetry & real-time bed coordination is now operational.</span>
+        <span className="kindsight-strip-badge">
+          {isHindi ? '2026 राष्ट्रीय ग्रिड रिलीज' : '2026 Grid Release'}
+        </span>
+        <span>
+          {isHindi
+            ? 'क्षेत्रीय एआई ट्राइएज टेलीमेट्री और रियल-टाइम आईसीयू समन्वय अब सक्रिय है।'
+            : 'Regional AI triage telemetry & real-time bed coordination is now operational.'}
+        </span>
       </div>
 
       {/* ===================================================================
@@ -155,29 +190,38 @@ export const LandingPage = () => {
         <div className="apollo-container">
           <div className="apollo-hero-pill">
             <span className="apollo-pulse-dot"></span>
-            <span>AI CLINICAL TRIAGE & RESOURCE ROUTING</span>
+            <span>{t('landing.hero_badge')}</span>
           </div>
 
           <h1 className="apollo-hero-title">
-            Healthcare intelligence that accelerates <span className="highlight">triage</span> & bed allocation
+            {isHindi ? (
+              <>
+                {t('landing.hero_title_1')} {t('landing.hero_title_2')}{' '}
+                <span className="highlight">{t('landing.hero_title_3')}</span>
+              </>
+            ) : (
+              <>
+                Healthcare intelligence that accelerates <span className="highlight">triage</span> & bed allocation
+              </>
+            )}
           </h1>
 
           <p className="apollo-hero-subtitle">
-            Turn hours of emergency bottlenecks into seconds. Connect real-time patient telemetry with predictive AI triage, verified clinical safety overrides, and dynamic hospital bed routing.
+            {t('landing.hero_subtitle')}
           </p>
 
           <form onSubmit={handleHeroSubmit} className="apollo-hero-actions">
             <div className="apollo-input-group">
               <input
                 type="email"
-                placeholder="Enter your clinical or hospital email..."
+                placeholder={t('landing.hero_email_placeholder')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="apollo-hero-input"
                 required
               />
               <button type="submit" className="apollo-hero-submit">
-                Sign Up <ArrowRight size={16} />
+                {t('landing.hero_cta_get_started')} <ArrowRight size={16} />
               </button>
             </div>
 
@@ -189,20 +233,20 @@ export const LandingPage = () => {
                   <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
                 </svg>
-                Sign in with Google
+                {isHindi ? 'गूगल से लॉगिन करें' : 'Sign in with Google'}
               </Link>
               <Link to="/login" className="apollo-oauth-btn">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.62-.75 1.04-1.8 0.92-2.85-.9.04-2 0.6-2.65 1.35-.58.66-1.09 1.73-.95 2.76 1.01.08 2.05-.51 2.68-1.26z"/>
                 </svg>
-                Sign in with Apple
+                {isHindi ? 'एप्पल से लॉगिन करें' : 'Sign in with Apple'}
               </Link>
             </div>
 
             <div className="apollo-trust-checks">
-              <span><CheckCircle2 size={15} color="#e1f079" /> Free for research clinics</span>
-              <span><CheckCircle2 size={15} color="#e1f079" /> No credit card required</span>
-              <span><CheckCircle2 size={15} color="#e1f079" /> 99.4% triage accuracy</span>
+              <span><CheckCircle2 size={15} color="#e1f079" /> {isHindi ? 'अनुसंधान क्लिनिकों के लिए निःशुल्क' : 'Free for research clinics'}</span>
+              <span><CheckCircle2 size={15} color="#e1f079" /> {isHindi ? 'क्रेडिट कार्ड की आवश्यकता नहीं' : 'No credit card required'}</span>
+              <span><CheckCircle2 size={15} color="#e1f079" /> {isHindi ? '99.4% ट्राइएज सटीकता' : '99.4% triage accuracy'}</span>
             </div>
           </form>
 
@@ -218,16 +262,20 @@ export const LandingPage = () => {
                   </svg>
                   <span className="kindsight-score-number">98%</span>
                 </div>
-                <span className="kindsight-score-label">Clinical Triage Precision</span>
+                <span className="kindsight-score-label">
+                  {isHindi ? 'क्लिनिकल ट्राइएज सटीकता' : 'Clinical Triage Precision'}
+                </span>
               </div>
 
               <div className="kindsight-alert-card">
                 <div className="kindsight-alert-header">
-                  <span className="kindsight-alert-tag">DISPATCH ALERT</span>
+                  <span className="kindsight-alert-tag">{isHindi ? 'डिस्पैच अलर्ट' : 'DISPATCH ALERT'}</span>
                   <span className="kindsight-alert-dot"></span>
                 </div>
                 <div className="kindsight-alert-title">Metro Trauma Center</div>
-                <div className="kindsight-alert-detail">6 ICU Beds Reserved • 8m transit ETA</div>
+                <div className="kindsight-alert-detail">
+                  {isHindi ? '6 आईसीयू बेड आरक्षित • 8 मिनट ट्रांजिट समय' : '6 ICU Beds Reserved • 8m transit ETA'}
+                </div>
               </div>
 
               <div className="kindsight-mini-telemetry">
@@ -254,7 +302,9 @@ export const LandingPage = () => {
           =================================================================== */}
       <section className="kindsight-trust-bar">
         <div className="apollo-container">
-          <h3 className="kindsight-trust-title">Driving these missions forward</h3>
+          <h3 className="kindsight-trust-title">
+            {isHindi ? 'अग्रणी स्वास्थ्य संस्थानों द्वारा समर्थित' : 'Driving these missions forward'}
+          </h3>
           <div className="kindsight-logos-row">
             <div className="kindsight-logo-item"><Hospital size={20} /> Johns Hopkins Medicine</div>
             <div className="kindsight-logo-item"><Building2 size={20} /> Mayo Clinic Network</div>
@@ -278,9 +328,9 @@ export const LandingPage = () => {
                 onClick={() => setActiveTab(0)}
               >
                 <div className="apollo-tab-kicker">
-                  <Stethoscope size={13} /> 01 / CLINICAL TRIAGE
+                  <Stethoscope size={13} /> {isHindi ? '01 / क्लिनिकल ट्राइएज' : '01 / CLINICAL TRIAGE'}
                 </div>
-                <div className="apollo-tab-title">AI Symptoms & Risk Engine</div>
+                <div className="apollo-tab-title">{isHindi ? 'एआई लक्षण एवं जोखिम इंजन' : 'AI Symptoms & Risk Engine'}</div>
               </button>
 
               <button
@@ -288,9 +338,9 @@ export const LandingPage = () => {
                 onClick={() => setActiveTab(1)}
               >
                 <div className="apollo-tab-kicker">
-                  <Hospital size={13} /> 02 / BED ROUTING
+                  <Hospital size={13} /> {isHindi ? '02 / बेड रूटिंग' : '02 / BED ROUTING'}
                 </div>
-                <div className="apollo-tab-title">Hospital Resource Grid</div>
+                <div className="apollo-tab-title">{isHindi ? 'अस्पताल संसाधन ग्रिड' : 'Hospital Resource Grid'}</div>
               </button>
 
               <button
@@ -298,9 +348,9 @@ export const LandingPage = () => {
                 onClick={() => setActiveTab(2)}
               >
                 <div className="apollo-tab-kicker">
-                  <Radio size={13} /> 03 / IOT VITALS
+                  <Radio size={13} /> {isHindi ? '03 / आईओटी विटल्स' : '03 / IOT VITALS'}
                 </div>
-                <div className="apollo-tab-title">Live Telemetry Monitor</div>
+                <div className="apollo-tab-title">{isHindi ? 'लाइव टेलीमेट्री मॉनिटर' : 'Live Telemetry Monitor'}</div>
               </button>
 
               <button
@@ -308,9 +358,9 @@ export const LandingPage = () => {
                 onClick={() => setActiveTab(3)}
               >
                 <div className="apollo-tab-kicker">
-                  <Layers size={13} /> 04 / CARE PATHWAY
+                  <Layers size={13} /> {isHindi ? '04 / केयर पाथवे' : '04 / CARE PATHWAY'}
                 </div>
-                <div className="apollo-tab-title">Doctor & SOAP Notes</div>
+                <div className="apollo-tab-title">{isHindi ? 'डॉक्टर और सोप नोट्स' : 'Doctor & SOAP Notes'}</div>
               </button>
             </div>
 
@@ -321,25 +371,29 @@ export const LandingPage = () => {
                 <div className="apollo-triage-demo">
                   <div className="apollo-triage-left">
                     <div className="apollo-panel-header">
-                      <h4 className="apollo-panel-title">Interactive Symptom & Vital Input</h4>
+                      <h4 className="apollo-panel-title">
+                        {isHindi ? 'इंटरैक्टिव लक्षण और विटल्स इनपुट' : 'Interactive Symptom & Vital Input'}
+                      </h4>
                       <span className="apollo-status-pill">
-                        <Sparkles size={13} /> Live Rule Engine + Gemini AI
+                        <Sparkles size={13} /> {isHindi ? 'लाइव नियम इंजन + जेमिनी एआई' : 'Live Rule Engine + Gemini AI'}
                       </span>
                     </div>
 
                     <p style={{ fontSize: '0.9rem', color: '#64748B' }}>
-                      Click symptoms to observe real-time AI risk evaluation and emergency overrides:
+                      {isHindi
+                        ? 'रीयल-टाइम एआई जोखिम मूल्यांकन देखने के लिए लक्षणों पर क्लिक करें:'
+                        : 'Click symptoms to observe real-time AI risk evaluation and emergency overrides:'}
                     </p>
 
                     <div className="apollo-symptom-cloud">
                       {[
-                        { id: 'chest_pain', label: 'Severe Chest Pressure' },
-                        { id: 'shortness_of_breath', label: 'Shortness of Breath' },
-                        { id: 'high_fever', label: 'High Fever (39.5°C)' },
-                        { id: 'dizziness', label: 'Sudden Dizziness' },
-                        { id: 'headache', label: 'Persistent Migraine' },
-                        { id: 'fatigue', label: 'Chronic Fatigue' },
-                        { id: 'cough', label: 'Dry Cough' },
+                        { id: 'chest_pain', label: isHindi ? 'सीने में तेज दर्द' : 'Severe Chest Pressure' },
+                        { id: 'shortness_of_breath', label: isHindi ? 'सांस लेने में तकलीफ' : 'Shortness of Breath' },
+                        { id: 'high_fever', label: isHindi ? 'तेज बुखार (39.5°C)' : 'High Fever (39.5°C)' },
+                        { id: 'dizziness', label: isHindi ? 'अचानक चक्कर आना' : 'Sudden Dizziness' },
+                        { id: 'headache', label: isHindi ? 'गंभीर सिरदर्द' : 'Persistent Migraine' },
+                        { id: 'fatigue', label: isHindi ? 'अत्यधिक थकान' : 'Chronic Fatigue' },
+                        { id: 'cough', label: isHindi ? 'सूखी खांसी' : 'Dry Cough' },
                       ].map((sym) => (
                         <button
                           key={sym.id}
@@ -355,9 +409,9 @@ export const LandingPage = () => {
                     <div className="apollo-vitals-sliders">
                       <div className="apollo-slider-row">
                         <div className="apollo-slider-label">
-                          <span>Blood Oxygen Saturation (SpO2)</span>
+                          <span>{isHindi ? 'रक्त ऑक्सीजन संतृप्ति (SpO2)' : 'Blood Oxygen Saturation (SpO2)'}</span>
                           <span style={{ color: spo2 < 90 ? '#DC2626' : '#10B981', fontFamily: 'var(--font-mono)' }}>
-                            {spo2}% {spo2 < 90 && '(CRITICAL)'}
+                            {spo2}% {spo2 < 90 && (isHindi ? '(गंभीर)' : '(CRITICAL)')}
                           </span>
                         </div>
                         <input
@@ -372,7 +426,7 @@ export const LandingPage = () => {
 
                       <div className="apollo-slider-row">
                         <div className="apollo-slider-label">
-                          <span>Heart Rate (Pulse)</span>
+                          <span>{isHindi ? 'हृदय गति (पल्स)' : 'Heart Rate (Pulse)'}</span>
                           <span style={{ color: heartRate > 120 ? '#DC2626' : '#0F172A', fontFamily: 'var(--font-mono)' }}>
                             {heartRate} BPM
                           </span>
@@ -393,7 +447,7 @@ export const LandingPage = () => {
                   <div className="apollo-triage-result">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: '#64748B', textTransform: 'uppercase' }}>
-                        Automated Triage Output
+                        {isHindi ? 'स्वचालित ट्राइएज परिणाम' : 'Automated Triage Output'}
                       </span>
                       <span className={`apollo-urgency-badge apollo-urgency-${urgencyLevel}`}>
                         {urgencyLevel}
@@ -404,39 +458,49 @@ export const LandingPage = () => {
                       <span className="apollo-risk-number" style={{ color: isEmergency ? '#DC2626' : isUrgent ? '#D97706' : '#15803D' }}>
                         {riskScore}
                       </span>
-                      <span className="apollo-risk-scale">/ 100 Risk Acuity</span>
+                      <span className="apollo-risk-scale">
+                        {isHindi ? '/ 100 जोखिम स्तर' : '/ 100 Risk Acuity'}
+                      </span>
                     </div>
 
                     <div style={{ background: '#F8FAFC', padding: '12px 16px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '0.86rem' }}>
                       <strong style={{ display: 'block', color: '#0F172A', marginBottom: '4px' }}>
-                        Model Used: {isEmergency ? 'Hard Safety Rule Engine (Priority 1)' : 'Gemini 1.5 Clinical Diagnostics'}
+                        {isHindi
+                          ? `प्रयुक्त मॉडल: ${isEmergency ? 'कठोर सुरक्षा नियम इंजन (प्राथमिकता 1)' : 'जेमिनी 1.5 क्लिनिकल डायग्नोस्टिक्स'}`
+                          : `Model Used: ${isEmergency ? 'Hard Safety Rule Engine (Priority 1)' : 'Gemini 1.5 Clinical Diagnostics'}`}
                       </strong>
                       <p style={{ color: '#475569', margin: 0 }}>
                         {isEmergency
-                          ? 'Triggered immediate emergency protocol due to critical physiologic threshold breach (SpO2 < 90% or acute cardiac markers).'
+                          ? (isHindi
+                              ? 'गंभीर शारीरिक सीमा उल्लंघन (SpO2 < 90% या तीव्र कार्डियक लक्षण) के कारण तत्काल आपातकालीन प्रोटोकॉल सक्रिय हुआ।'
+                              : 'Triggered immediate emergency protocol due to critical physiologic threshold breach (SpO2 < 90% or acute cardiac markers).')
                           : isUrgent
-                          ? 'Moderate physiologic elevation detected. High probability of acute respiratory or circulatory stress requiring urgent hospital evaluation.'
-                          : 'Vitals stable. Standard outpatient observation or telehealth consultation recommended.'}
+                          ? (isHindi
+                              ? 'मध्यम शारीरिक असंतुलन का पता चला। तीव्र श्वसन या संवहनी तनाव की उच्च संभावना, तत्काल अस्पताल मूल्यांकन आवश्यक।'
+                              : 'Moderate physiologic elevation detected. High probability of acute respiratory or circulatory stress requiring urgent hospital evaluation.')
+                          : (isHindi
+                              ? 'विटल्स स्थिर हैं। सामान्य ओपीडी परामर्श या टेलीहेल्थ परामर्श अनुशंसित।'
+                              : 'Vitals stable. Standard outpatient observation or telehealth consultation recommended.')}
                       </p>
                     </div>
 
                     <ul className="apollo-action-checklist">
                       <li>
                         <CheckCircle2 size={16} color="#10B981" />
-                        <span>Automated ambulance dispatch route generated</span>
+                        <span>{isHindi ? 'स्वचालित एम्बुलेंस डिस्पैच मार्ग उत्पन्न हुआ' : 'Automated ambulance dispatch route generated'}</span>
                       </li>
                       <li>
                         <CheckCircle2 size={16} color="#10B981" />
-                        <span>Instant telemetry synced to incoming trauma center</span>
+                        <span>{isHindi ? 'आने वाले ट्रॉमा सेंटर को तुरंत टेलीमेट्री सिंक हुई' : 'Instant telemetry synced to incoming trauma center'}</span>
                       </li>
                       <li>
                         <CheckCircle2 size={16} color="#10B981" />
-                        <span>ICU bedside reservation hold placed</span>
+                        <span>{isHindi ? 'आईसीयू बेड पर अग्रिम आरक्षण सुरक्षित' : 'ICU bedside reservation hold placed'}</span>
                       </li>
                     </ul>
 
                     <Link to="/register" className="apollo-btn-primary" style={{ justifyContent: 'center', marginTop: 'auto' }}>
-                      Deploy Triage Engine to Your Hospital <ArrowRight size={16} />
+                      {isHindi ? 'अपने अस्पताल में ट्राइएज इंजन तैनात करें' : 'Deploy Triage Engine to Your Hospital'} <ArrowRight size={16} />
                     </Link>
                   </div>
                 </div>
@@ -761,8 +825,18 @@ export const LandingPage = () => {
       <section id="faq" className="apollo-faq-section">
         <div className="apollo-container">
           <div className="apollo-section-header">
-            <span className="apollo-kicker">Frequently Asked Questions</span>
-            <h2 className="apollo-section-title">Everything you need to <span className="kindsight-italic-spark">know</span></h2>
+            <span className="apollo-kicker">{t('landing.faq_title')}</span>
+            <h2 className="apollo-section-title">
+              {isHindi ? (
+                <>
+                  वह सब कुछ जो आपको <span className="kindsight-italic-spark">जानना आवश्यक है</span>
+                </>
+              ) : (
+                <>
+                  Everything you need to <span className="kindsight-italic-spark">know</span>
+                </>
+              )}
+            </h2>
           </div>
 
           <div className="apollo-faq-list">
@@ -803,53 +877,53 @@ export const LandingPage = () => {
                   <span className="apollo-brand-name">
                     Medi<span>Connect</span>
                   </span>
-                  <span className="apollo-brand-tagline">AI Health Grid</span>
+                  <span className="apollo-brand-tagline">{t('nav.brand_tagline')}</span>
                 </div>
               </div>
               <p>
-                The AI clinical triage & resource routing platform connecting patients, healthcare telemetry, and regional hospital networks.
+                {t('landing.footer_tagline')}
               </p>
             </div>
 
             <div className="apollo-footer-col">
-              <h5>Platform</h5>
+              <h5>{isHindi ? 'प्लेटफ़ॉर्म' : 'Platform'}</h5>
               <ul>
-                <li><a href="#product-sandbox">Clinical Triage Engine</a></li>
-                <li><a href="#product-sandbox">Hospital Resource Grid</a></li>
-                <li><a href="#product-sandbox">IoT Vitals Telemetry</a></li>
-                <li><a href="#product-sandbox">Care Pathway Pipeline</a></li>
-                <li><Link to="/capacity">Capacity Manager</Link></li>
+                <li><a href="#product-sandbox">{isHindi ? 'क्लिनिकल ट्राइएज इंजन' : 'Clinical Triage Engine'}</a></li>
+                <li><a href="#product-sandbox">{isHindi ? 'अस्पताल संसाधन ग्रिड' : 'Hospital Resource Grid'}</a></li>
+                <li><a href="#product-sandbox">{isHindi ? 'आईओटी विटल्स टेलीमेट्री' : 'IoT Vitals Telemetry'}</a></li>
+                <li><a href="#product-sandbox">{isHindi ? 'केयर पाथवे पाइपलाइन' : 'Care Pathway Pipeline'}</a></li>
+                <li><Link to="/capacity">{isHindi ? 'क्षमता प्रबंधक' : 'Capacity Manager'}</Link></li>
               </ul>
             </div>
 
             <div className="apollo-footer-col">
-              <h5>Solutions</h5>
+              <h5>{isHindi ? 'समाधान' : 'Solutions'}</h5>
               <ul>
-                <li><Link to="/triage">Emergency Triage</Link></li>
-                <li><Link to="/facilities">Bed Matching</Link></li>
-                <li><Link to="/iot-monitor">Remote Patient Monitoring</Link></li>
-                <li><Link to="/referrals">Inter-Hospital Referrals</Link></li>
-                <li><Link to="/my-care-path">Patient Portal</Link></li>
+                <li><Link to="/triage">{isHindi ? 'आपातकालीन ट्राइएज' : 'Emergency Triage'}</Link></li>
+                <li><Link to="/facilities">{isHindi ? 'बेड मिलान' : 'Bed Matching'}</Link></li>
+                <li><Link to="/iot-monitor">{isHindi ? 'रिमोट मरीज निगरानी' : 'Remote Patient Monitoring'}</Link></li>
+                <li><Link to="/referrals">{isHindi ? 'इंटर-अस्पताल रेफरल' : 'Inter-Hospital Referrals'}</Link></li>
+                <li><Link to="/my-care-path">{isHindi ? 'मरीज पोर्टल' : 'Patient Portal'}</Link></li>
               </ul>
             </div>
 
             <div className="apollo-footer-col">
-              <h5>Compliance</h5>
+              <h5>{isHindi ? 'मानक एवं अनुपालन' : 'Compliance'}</h5>
               <ul>
-                <li><a href="#features">HIPAA Compliance</a></li>
+                <li><a href="#features">ABDM & Ayushman Bharat</a></li>
+                <li><a href="#features">DPDP Act (India)</a></li>
                 <li><a href="#features">HL7 FHIR v4.0</a></li>
-                <li><a href="#features">SOC2 Type II</a></li>
-                <li><a href="#features">Audit Trails</a></li>
+                <li><a href="#features">AES-256 Encryption</a></li>
                 <li><a href="#features">Clinical Safety Logs</a></li>
               </ul>
             </div>
 
             <div className="apollo-footer-col">
-              <h5>Access</h5>
+              <h5>{isHindi ? 'त्वरित प्रवेश' : 'Access'}</h5>
               <ul>
-                <li><Link to="/login">Clinician Sign In</Link></li>
-                <li><Link to="/register">Register Facility</Link></li>
-                <li><Link to="/">Live Dashboard</Link></li>
+                <li><Link to="/login">{isHindi ? 'क्लिनिशियन साइन इन' : 'Clinician Sign In'}</Link></li>
+                <li><Link to="/register">{isHindi ? 'अस्पताल पंजीकरण' : 'Register Facility'}</Link></li>
+                <li><Link to="/">{isHindi ? 'लाइव डैशबोर्ड' : 'Live Dashboard'}</Link></li>
                 <li><a href="https://github.com/svedant1207/Mediconnect" target="_blank" rel="noopener noreferrer">GitHub Repository ↗</a></li>
               </ul>
             </div>
@@ -857,11 +931,13 @@ export const LandingPage = () => {
 
           <div className="apollo-footer-bottom">
             <div>
-              © 2026 MediConnect AI Inc. All rights reserved.
+              {isHindi
+                ? '© 2026 मेडीकनेक्ट एआई। सर्वाधिकार सुरक्षित। भारतीय स्वास्थ्य सेवा ग्रिड के लिए निर्मित।'
+                : '© 2026 MediConnect AI Inc. All rights reserved. Built for the Indian Healthcare Grid.'}
             </div>
             <div className="apollo-status-pill">
               <span className="apollo-pulse-dot"></span>
-              All Health Grid Systems Operational
+              {isHindi ? 'सभी स्वास्थ्य ग्रिड प्रणालियाँ सक्रिय हैं' : 'All Health Grid Systems Operational'}
             </div>
           </div>
         </div>

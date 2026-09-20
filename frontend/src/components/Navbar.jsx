@@ -28,10 +28,13 @@ import {
   Edit3
 } from 'lucide-react';
 import { EditPatientProfileModal } from './EditPatientProfileModal';
+import { useLanguage } from '../context/LanguageContext';
+import { LanguageToggle } from './LanguageToggle';
 import '../styles/DashboardApollo.css';
 
 export const Navbar = () => {
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -78,29 +81,29 @@ export const Navbar = () => {
   };
 
   const patientNavItems = [
-    { path: '/', label: 'Passport', icon: ShieldCheck },
-    { path: '/reports', label: 'Medical Reports', icon: FileText },
-    { path: '/facilities', label: 'Facilities', icon: Building2 },
-    { path: '/my-journey', label: 'My Journey', icon: Clock },
-    { path: '/consent', label: 'Consent & Privacy', icon: Lock },
-    { path: '/my-health', label: 'My Health', icon: Heart },
+    { path: '/', label: t('nav.passport'), icon: ShieldCheck },
+    { path: '/reports', label: t('nav.reports'), icon: FileText },
+    { path: '/facilities', label: t('nav.facilities'), icon: Building2 },
+    { path: '/my-journey', label: t('nav.journey'), icon: Clock },
+    { path: '/consent', label: t('nav.consent'), icon: Lock },
+    { path: '/my-health', label: t('nav.health'), icon: Heart },
   ];
 
   const doctorNavItems = [
-    { path: '/', label: 'Consultation Queue', icon: Clock },
-    { path: '/patients', label: 'My Patients', icon: Users },
-    { path: '/reports', label: 'Medical Reports', icon: FileText },
-    { path: '/referrals', label: 'Referrals', icon: ArrowRightLeft },
+    { path: '/', label: t('nav.queue'), icon: Clock },
+    { path: '/patients', label: t('nav.patients'), icon: Users },
+    { path: '/reports', label: t('nav.reports'), icon: FileText },
+    { path: '/referrals', label: t('nav.referrals'), icon: ArrowRightLeft },
   ];
 
   const adminNavItems = [
-    { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/checkin', label: 'Check-In Terminal', icon: Scan },
-    { path: '/reports', label: 'Medical Reports', icon: FileText },
-    { path: '/facilities', label: 'Facilities', icon: Building2 },
-    { path: '/capacity', label: 'Capacity', icon: Sliders },
-    { path: '/referrals', label: 'Referrals', icon: ArrowRightLeft },
-    { path: '/patients', label: 'Patients', icon: Users },
+    { path: '/', label: t('nav.dashboard'), icon: LayoutDashboard },
+    { path: '/checkin', label: t('nav.checkin'), icon: Scan },
+    { path: '/reports', label: t('nav.reports'), icon: FileText },
+    { path: '/facilities', label: t('nav.facilities'), icon: Building2 },
+    { path: '/capacity', label: t('nav.capacity'), icon: Sliders },
+    { path: '/referrals', label: t('nav.referrals'), icon: ArrowRightLeft },
+    { path: '/patients', label: t('nav.patients'), icon: Users },
   ];
 
   const navItems = isPatient ? patientNavItems : (isDoctor ? doctorNavItems : adminNavItems);
@@ -142,7 +145,7 @@ export const Navbar = () => {
                 <span className="apollo-brand-name">
                   Medi<span>Connect</span>
                 </span>
-                <span className="apollo-brand-tagline">AI Health Grid</span>
+                <span className="apollo-brand-tagline">{t('nav.brand_tagline')}</span>
               </div>
             </Link>
 
@@ -168,6 +171,9 @@ export const Navbar = () => {
           </div>
 
           <div className="apollo-nav-right">
+            {/* Language Toggle in Main App Navbar */}
+            <LanguageToggle compact={true} />
+
             {user ? (
               <>
                 {/* Clickable User Chip with Chevron */}
@@ -198,16 +204,16 @@ export const Navbar = () => {
                   title="Sign out safely"
                 >
                   <LogOut size={15} />
-                  <span>Sign Out</span>
+                  <span>{t('nav.sign_out')}</span>
                 </button>
               </>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Link to="/login" className="apollo-dash-btn-secondary" style={{ padding: '6px 14px', fontSize: '0.82rem' }}>
-                  Sign In
+                  {t('nav.sign_in')}
                 </Link>
                 <Link to="/register" className="apollo-dash-btn-primary" style={{ padding: '6px 14px', fontSize: '0.82rem' }}>
-                  Register
+                  {t('nav.register')}
                 </Link>
               </div>
             )}
@@ -229,7 +235,7 @@ export const Navbar = () => {
             <div className="apollo-profile-modal-header">
               <div className="apollo-profile-modal-title">
                 <ShieldCheck size={18} color="#2563EB" />
-                <span>{isPatient ? 'Patient Profile & Health Identity' : 'Healthcare Provider Account'}</span>
+                <span>{isPatient ? t('nav.profile_title_patient') : t('nav.profile_title_provider')}</span>
               </div>
               <button
                 type="button"
