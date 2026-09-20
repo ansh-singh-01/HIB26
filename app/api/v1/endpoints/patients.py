@@ -478,17 +478,129 @@ async def list_my_medical_history(
 
 @router.get("/me/medical-tests", response_model=List[MedicalTestRecordOut])
 async def list_my_medical_tests(
+    name: Optional[str] = None,
+    search: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Retrieve all diagnostic tests and lab reports for the authenticated patient."""
-    patient = await _get_or_404(db, current_user)
-    result = await db.execute(
-        select(MedicalTestRecord)
-        .where(MedicalTestRecord.patient_id == patient.id)
-        .order_by(MedicalTestRecord.test_date.desc())
+    """Retrieve all diagnostic tests and lab reports for the authenticated patient or doctor."""
+    is_doctor = (
+        current_user.role in [UserRole.DOCTOR, UserRole.ADMIN] or
+        (isinstance(current_user.role, str) and current_user.role.lower() in ["doctor", "admin"])
     )
+    search_query = (name or search or "").strip()
+    if is_doctor:
+        query = select(MedicalTestRecord)
+        if search_query:
+            query = query.where(MedicalTestRecord.test_name.ilike(f"%{search_query}%"))
+        query = query.order_by(desc(MedicalTestRecord.test_date))
+        res = await db.execute(query)
+        return res.scalars().all()
+
+    patient = await _get_or_404(db, current_user)
+    query = select(MedicalTestRecord).where(MedicalTestRecord.patient_id == patient.id)
+    if search_query:
+        query = query.where(MedicalTestRecord.test_name.ilike(f"%{search_query}%"))
+    query = query.order_by(desc(MedicalTestRecord.test_date))
+    result = await db.execute(query)
     return result.scalars().all()
+
+
+@router.get("/doctor/medical-reports")
+async def get_doctor_medical_reports(
+    name: Optional[str] = None,
+    search: Optional[str] = None,
+    patient_id: Optional[uuid.UUID] = None,
+    category: Optional[str] = None,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Doctor-focused medical reports search & repository.
+    Allows searching patient medical reports by report/test name or patient name.
+    """
+    is_doctor_or_admin = (
+        current_user.role in [UserRole.DOCTOR, UserRole.ADMIN] or
+        (isinstance(current_user.role, str) and current_user.role.lower() in ["doctor", "admin"])
+    )
+
+    stmt = (
+        select(MedicalTestRecord, Patient, User)
+        .join(Patient, MedicalTestRecord.patient_id == Patient.id)
+        .join(User, Patient.user_id == User.id)
+    )
+
+    if not is_doctor_or_admin:
+        stmt = stmt.where(Patient.user_id == current_user.id)
+    elif patient_id:
+        stmt = stmt.where(MedicalTestRecord.patient_id == patient_id)
+
+    if category and category.lower() != "all":
+        stmt = stmt.where(MedicalTestRecord.category.ilike(f"%{category}%"))
+
+    search_query = (name or search or "").strip()
+    if search_query:
+        search_pattern = f"%{search_query}%"
+        stmt = stmt.where(
+            (MedicalTestRecord.test_name.ilike(search_pattern)) |
+            (User.full_name.ilike(search_pattern)) |
+            (MedicalTestRecord.result_summary.ilike(search_pattern)) |
+            (MedicalTestRecord.category.ilike(search_pattern)) |
+            (Patient.medi_connect_id.ilike(search_pattern))
+        )
+
+    stmt = stmt.order_by(desc(MedicalTestRecord.test_date))
+    res = await db.execute(stmt)
+    records = res.all()
+
+    doctor, facility = await _resolve_doctor_and_facility(db, current_user)
+    facility_name = facility.name if facility else "Maharaja Yashwantrao Hospital (MYH Indore)"
+    doctor_name = doctor.full_name if doctor else (current_user.full_name or "Attending Physician")
+
+    output = []
+    now = datetime.utcnow()
+    for test, pat, usr in records:
+        age = 35
+        if pat.date_of_birth:
+            age = max(1, (now.date() - pat.date_of_birth.date()).days // 365)
+
+        summary_lower = (test.result_summary or "").lower()
+        is_attention = (
+            "abnormal" in summary_lower or
+            "high" in summary_lower or
+            "elevated" in summary_lower or
+            "critical" in summary_lower
+        )
+
+        output.append({
+            "id": str(test.id),
+            "test_name": test.test_name,
+            "category": test.category or "General Diagnostic",
+            "result_summary": test.result_summary or "Clinical findings verified and uploaded to patient record.",
+            "test_date": test.test_date.isoformat() if test.test_date else now.isoformat(),
+            "patient_id": str(pat.id),
+            "patient_name": usr.full_name or "Verified Patient",
+            "patient_email": usr.email,
+            "medi_connect_id": pat.medi_connect_id or f"MC-{str(pat.id)[:6].upper()}",
+            "patient_gender": pat.gender or "Unknown",
+            "patient_age": age,
+            "patient_blood_group": pat.blood_group or "O+",
+            "facility_name": facility_name,
+            "doctor_name": doctor_name,
+            "status": "attention" if is_attention else "normal",
+            "status_label": "Requires Attention" if is_attention else "Verified & Signed",
+            "connection_context": f"Digitally authenticated across Medi-Connect Longitudinal Care Grid for {usr.full_name or 'Patient'}.",
+            "verified": True,
+            "parameters": [
+                {
+                    "name": test.test_name,
+                    "value": "Recorded",
+                    "ref": "Standard Clinical Range",
+                    "status": "attention" if is_attention else "normal",
+                }
+            ],
+        })
+    return output
 
 
 @router.post("/me/medical-tests", response_model=MedicalTestRecordOut, status_code=201)

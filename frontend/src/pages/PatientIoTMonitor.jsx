@@ -12,11 +12,22 @@ import {
   Navigation,
   Building2,
   PhoneCall,
-  Sparkles
+  Sparkles,
+  Locate,
+  Compass,
+  MapPin
 } from 'lucide-react';
+import {
+  getCurrentGPSCoordinates,
+  haversineDistanceKm,
+  getDrivingETA,
+  getGoogleMapsNavUrl,
+  INDORE_LANDMARK_PRESETS,
+  INDORE_DEFAULT_LAT,
+  INDORE_DEFAULT_LNG
+} from '../utils/geo';
 
 export const PatientIoTMonitor = () => {
-  const [isStreaming, setIsStreaming] = useState(true);
   const [deviceStatus, setDeviceStatus] = useState('ONLINE');
   const [vitals, setVitals] = useState({
     heart_rate: 72,
@@ -26,12 +37,24 @@ export const PatientIoTMonitor = () => {
     body_temp_c: 36.8,
   });
 
+  // GPS Telemetry State
+  const [gpsLocation, setGpsLocation] = useState({
+    lat: INDORE_DEFAULT_LAT,
+    lng: INDORE_DEFAULT_LNG,
+    name: 'Indore Central (Rajwada)',
+    isLiveGPS: false,
+    accuracy: 12,
+  });
+  const [gpsDetecting, setGpsDetecting] = useState(false);
+  const [gpsStatusMessage, setGpsStatusMessage] = useState('');
+
   const [loading, setLoading] = useState(false);
   const [telemetryResponse, setTelemetryResponse] = useState(null);
 
   // Send telemetry stream to backend
-  const pushTelemetry = async (overrideVitals = null) => {
+  const pushTelemetry = async (overrideVitals = null, overrideGPS = null) => {
     const currentVitals = overrideVitals || vitals;
+    const currentGPS = overrideGPS || gpsLocation;
     setLoading(true);
     try {
       const res = await iotService.sendTelemetry({
@@ -41,8 +64,8 @@ export const PatientIoTMonitor = () => {
         blood_pressure_sys: currentVitals.blood_pressure_sys,
         blood_pressure_dia: currentVitals.blood_pressure_dia,
         body_temp_c: currentVitals.body_temp_c,
-        location_lat: 22.7196,
-        location_lng: 75.8577,
+        location_lat: currentGPS.lat,
+        location_lng: currentGPS.lng,
       });
       setTelemetryResponse(res);
     } catch (err) {
@@ -56,6 +79,56 @@ export const PatientIoTMonitor = () => {
     // Initial telemetry push
     pushTelemetry();
   }, []);
+
+  const handleAcquireDeviceGPS = async () => {
+    setGpsDetecting(true);
+    setGpsStatusMessage('Acquiring high-accuracy wearable GPS signal...');
+    try {
+      const coords = await getCurrentGPSCoordinates();
+      const updatedGPS = {
+        lat: coords.latitude,
+        lng: coords.longitude,
+        name: 'My Device Live GPS Fix',
+        isLiveGPS: true,
+        accuracy: coords.accuracy,
+      };
+      setGpsLocation(updatedGPS);
+      setGpsStatusMessage(`GPS Locked! (Accuracy ±${coords.accuracy}m)`);
+      pushTelemetry(null, updatedGPS);
+      setTimeout(() => setGpsStatusMessage(''), 5000);
+    } catch (err) {
+      setGpsStatusMessage(err.message);
+      setTimeout(() => setGpsStatusMessage(''), 6000);
+    } finally {
+      setGpsDetecting(false);
+    }
+  };
+
+  const handleSelectPreset = (preset) => {
+    const updatedGPS = {
+      lat: preset.lat,
+      lng: preset.lng,
+      name: `${preset.name} (${preset.area})`,
+      isLiveGPS: false,
+      accuracy: 15,
+    };
+    setGpsLocation(updatedGPS);
+    setGpsStatusMessage(`GPS Location set to ${preset.name}`);
+    pushTelemetry(null, updatedGPS);
+    setTimeout(() => setGpsStatusMessage(''), 3000);
+  };
+
+  const handleSimulateEmergency = () => {
+    const criticalVitals = {
+      heart_rate: 138,
+      spo2: 86,
+      blood_pressure_sys: 185,
+      blood_pressure_dia: 105,
+      body_temp_c: 39.4,
+    };
+    setVitals(criticalVitals);
+    pushTelemetry(criticalVitals);
+  };
 
   const handleSimulateNormal = () => {
     const normal = {
@@ -74,11 +147,11 @@ export const PatientIoTMonitor = () => {
       {/* Header Banner */}
       <div className="flex items-center justify-between" style={{ marginBottom: '24px' }}>
         <div>
-          <h1 style={{ fontSize: '1.8rem', display: 'flex', items: 'center', gap: '10px' }}>
-            <Radio color="#06b6d4" /> IoT Wearable Telemetry
+          <h1 style={{ fontSize: '1.8rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Radio color="#06b6d4" /> IoT Wearable Biosensor & GPS Telemetry
           </h1>
           <p style={{ color: 'var(--text-muted)' }}>
-            Continuous real-time biosensor telemetry stream. Vital signs are monitored and evaluated by the clinical triage engine.
+            Continuous real-time biosensor telemetry stream with live GPS geotagging. Evaluated automatically by the clinical triage engine.
           </p>
         </div>
 
@@ -93,30 +166,33 @@ export const PatientIoTMonitor = () => {
       </div>
 
       {/* Live Stream Status Bar */}
-      <div className="glass-card" style={{ padding: '16px 24px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#FFFFFF' }}>
+      <div className="glass-card" style={{ padding: '16px 24px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#FFFFFF', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Radio size={18} color="#2563EB" className="animate-pulse" />
           <div>
             <span style={{ fontSize: '0.92rem', fontWeight: '700', color: 'var(--text-main)', display: 'block' }}>
-              Wearable Biosensor Stream: Connected & Transmitting
+              Wearable Biosensor & GPS Stream: Connected & Transmitting
             </span>
             <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-              Continuous vital sign telemetry evaluated automatically by clinical triage engine
+              Continuous vital signs and GPS coordinates evaluated automatically for ambulance dispatch
             </span>
           </div>
         </div>
         <div className="flex gap-2">
+          <button onClick={handleSimulateEmergency} className="btn btn-danger btn-sm">
+            <ShieldAlert size={16} /> Simulate Cardiac Emergency (SpO2 &lt; 90)
+          </button>
           <button onClick={handleSimulateNormal} className="btn btn-secondary btn-sm">
             <CheckCircle2 size={16} color="#10b981" /> Sync Resting Vitals
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2" style={{ alignItems: 'start' }}>
+      <div className="grid grid-cols-2" style={{ gap: '24px', alignItems: 'start' }}>
         {/* Left Telemetry HUD Card */}
         <div className="glass-card" style={{ padding: '28px' }}>
           <h2 style={{ fontSize: '1.2rem', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Activity color="#2563EB" size={20} /> Live Sensor Pulse HUD
+            <Activity color="#2563EB" size={20} /> Live Biosensor Pulse HUD
           </h2>
 
           <div className="grid grid-cols-2" style={{ gap: '16px', marginBottom: '24px' }}>
@@ -126,7 +202,7 @@ export const PatientIoTMonitor = () => {
                 <span style={{ fontSize: '0.8rem', color: '#BE123C', fontWeight: '600' }}>Heart Rate</span>
                 <Heart size={20} color="#E11D48" className="animate-pulse" />
               </div>
-              <span style={{ fontSize: '2.4rem', fontWeight: '800', color: 'var(--text-main)' }}>
+              <span style={{ fontSize: '2.4rem', fontWeight: '800', color: vitals.heart_rate > 100 ? '#E11D48' : 'var(--text-main)' }}>
                 {vitals.heart_rate} <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>BPM</span>
               </span>
             </div>
@@ -148,7 +224,7 @@ export const PatientIoTMonitor = () => {
                 <span style={{ fontSize: '0.8rem', color: '#6D28D9', fontWeight: '600' }}>Blood Pressure</span>
                 <Activity size={20} color="#7C3AED" />
               </div>
-              <span style={{ fontSize: '2rem', fontWeight: '800', color: vitals.blood_pressure_sys < 90 ? '#DC2626' : 'var(--text-main)' }}>
+              <span style={{ fontSize: '2rem', fontWeight: '800', color: vitals.blood_pressure_sys > 140 ? '#DC2626' : 'var(--text-main)' }}>
                 {intOr(vitals.blood_pressure_sys)}/{intOr(vitals.blood_pressure_dia)} <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>mmHg</span>
               </span>
             </div>
@@ -165,8 +241,79 @@ export const PatientIoTMonitor = () => {
             </div>
           </div>
 
+          {/* Wearable Live GPS Beacon HUD */}
+          <div style={{
+            background: gpsLocation.isLiveGPS ? '#F0FDF4' : '#F8FAFC',
+            border: gpsLocation.isLiveGPS ? '1px solid #86EFAC' : '1px solid var(--border-color)',
+            borderRadius: '12px',
+            padding: '16px',
+            marginBottom: '20px'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Compass size={18} color={gpsLocation.isLiveGPS ? '#16A34A' : '#2563EB'} />
+                <strong style={{ fontSize: '0.88rem', color: gpsLocation.isLiveGPS ? '#15803D' : '#1E293B' }}>
+                  Wearable GPS Telemetry Beacon
+                </strong>
+              </div>
+              {gpsLocation.isLiveGPS ? (
+                <span className="badge badge-low flex items-center gap-1" style={{ fontSize: '0.7rem' }}>
+                  <Radio size={10} className="animate-pulse" /> Live Satellite Fix
+                </span>
+              ) : (
+                <span className="badge badge-info" style={{ fontSize: '0.7rem' }}>Indore Grid Anchor</span>
+              )}
+            </div>
+
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+              Location: <strong>{gpsLocation.name}</strong> • Coordinates: <strong>{gpsLocation.lat.toFixed(4)}°N, {gpsLocation.lng.toFixed(4)}°E</strong>
+              {gpsLocation.accuracy && <span style={{ color: '#059669', marginLeft: '6px' }}>(±{gpsLocation.accuracy}m)</span>}
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={handleAcquireDeviceGPS}
+                disabled={gpsDetecting}
+                className="btn btn-primary btn-sm flex items-center gap-1"
+                style={{ fontSize: '0.78rem' }}
+              >
+                <Locate size={13} className={gpsDetecting ? 'animate-spin' : ''} />
+                {gpsDetecting ? 'Fixing GPS...' : 'Acquire Wearable Live GPS'}
+              </button>
+
+              <select
+                className="form-select"
+                style={{ flex: 1, minWidth: '160px', padding: '4px 8px', fontSize: '0.78rem' }}
+                value={INDORE_LANDMARK_PRESETS.some(p => p.name.includes(gpsLocation.name)) ? gpsLocation.name : ''}
+                onChange={(e) => {
+                  const preset = INDORE_LANDMARK_PRESETS.find(p => p.name === e.target.value);
+                  if (preset) handleSelectPreset(preset);
+                }}
+              >
+                <option value="" disabled>Simulate Location (Indore Landmark)</option>
+                {INDORE_LANDMARK_PRESETS.map((p, idx) => (
+                  <option key={idx} value={p.name}>
+                    {p.name} ({p.area})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {gpsStatusMessage && (
+              <div style={{
+                marginTop: '8px',
+                fontSize: '0.78rem',
+                color: gpsStatusMessage.includes('Locked') || gpsStatusMessage.includes('set') ? '#16A34A' : '#DC2626',
+                fontWeight: 600
+              }}>
+                {gpsStatusMessage}
+              </div>
+            )}
+          </div>
+
           <button onClick={() => pushTelemetry()} disabled={loading} className="btn btn-outline" style={{ width: '100%' }}>
-            <Zap size={16} /> Sync Latest Telemetry Signal
+            <Zap size={16} /> Force Sync Telemetry & GPS Beacon
           </button>
         </div>
 
@@ -205,28 +352,54 @@ export const PatientIoTMonitor = () => {
                 </p>
               </div>
 
-              {/* Matched Nearest Emergency Hospital */}
-              {telemetryResponse.matched_facility && (
-                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '20px', marginBottom: '20px' }}>
-                  <span style={{ fontSize: '0.8rem', color: '#2563EB', fontWeight: '700', textTransform: 'uppercase', display: 'block', marginBottom: '10px', letterSpacing: '0.04em' }}>
-                    Auto-Matched Emergency Trauma Hospital
-                  </span>
-                  <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', padding: '16px', borderRadius: '12px' }}>
-                    <h3 style={{ fontSize: '1.15rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <Building2 color="#2563EB" size={20} /> {telemetryResponse.matched_facility.name}
-                    </h3>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '10px' }}>
-                      {telemetryResponse.matched_facility.address} | Available ICU Beds: <strong style={{ color: '#059669' }}>{telemetryResponse.matched_facility.available_icu_beds}</strong>
-                    </p>
+              {/* Matched Nearest Emergency Hospital with Live Distance & Navigation */}
+              {telemetryResponse.matched_facility && (() => {
+                const facLat = telemetryResponse.matched_facility.location_lat || INDORE_DEFAULT_LAT;
+                const facLng = telemetryResponse.matched_facility.location_lng || INDORE_DEFAULT_LNG;
+                const distanceKm = haversineDistanceKm(gpsLocation.lat, gpsLocation.lng, facLat, facLng);
+                const drivingETA = getDrivingETA(distanceKm);
+                const mapsUrl = getGoogleMapsNavUrl(gpsLocation.lat, gpsLocation.lng, facLat, facLng);
+
+                return (
+                  <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '20px', marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                      <span style={{ fontSize: '0.8rem', color: '#2563EB', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        Auto-Matched Emergency Trauma Hospital
+                      </span>
+                      {distanceKm != null && (
+                        <span className="badge badge-info flex items-center gap-1">
+                          <MapPin size={11} /> {distanceKm} km away (~{drivingETA} min ETA)
+                        </span>
+                      )}
+                    </div>
+
+                    <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', padding: '16px', borderRadius: '12px' }}>
+                      <h3 style={{ fontSize: '1.15rem', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Building2 color="#2563EB" size={20} /> {telemetryResponse.matched_facility.name}
+                      </h3>
+                      <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '10px' }}>
+                        {telemetryResponse.matched_facility.address} | Available ICU Beds: <strong style={{ color: '#059669' }}>{telemetryResponse.matched_facility.available_icu_beds}</strong>
+                      </p>
+
+                      <a
+                        href={mapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-primary btn-sm flex items-center gap-1"
+                        style={{ textDecoration: 'none', display: 'inline-flex', padding: '6px 12px' }}
+                      >
+                        <Navigation size={14} /> Open Live GPS Turn-by-Turn Route
+                      </a>
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* Turn-by-turn Navigation */}
               {telemetryResponse.navigation && (
                 <div style={{ marginBottom: '24px' }}>
                   <h4 style={{ fontSize: '0.92rem', color: '#2563EB', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Navigation size={16} /> GPS Turn-by-Turn Transit Directions (ETA: {telemetryResponse.navigation.estimated_travel_minutes} mins)
+                    <Navigation size={16} /> Rapid Transit Corridor Directions (ETA: {telemetryResponse.navigation.estimated_travel_minutes} mins)
                   </h4>
                   <ul style={{ paddingLeft: '20px', color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: '1.6' }}>
                     {telemetryResponse.navigation.turn_by_turn.map((step, idx) => (
@@ -244,7 +417,6 @@ export const PatientIoTMonitor = () => {
                 >
                   <PhoneCall size={20} /> One-Touch SOS Emergency Call Hotline (108 / 112)
                 </a>
-
               )}
             </div>
           ) : (

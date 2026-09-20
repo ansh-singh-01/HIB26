@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { digiYatraService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { digiYatraService, doctorService } from '../services/api';
 import { 
   FileText, 
   Building2, 
@@ -22,7 +23,10 @@ import {
   Stethoscope,
   ClipboardList,
   Sparkles,
-  Link2
+  Link2,
+  User,
+  Users,
+  Check
 } from 'lucide-react';
 import '../styles/DashboardApollo.css';
 
@@ -127,12 +131,19 @@ const INITIAL_REPORTS = [
 ];
 
 export const MedicalReports = () => {
+  const { user } = useAuth();
+  const isDoctor = (user?.role ? user.role.toLowerCase() : '') === 'doctor';
+  const isAdmin = (user?.role ? user.role.toLowerCase() : '') === 'admin';
+  const isClinician = isDoctor || isAdmin;
+
   const [reports, setReports] = useState(INITIAL_REPORTS);
   const [passport, setPassport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedPatientId, setSelectedPatientId] = useState('ALL');
+  const [patientList, setPatientList] = useState([]);
   
   // Modals
   const [showAddModal, setShowAddModal] = useState(false);
@@ -149,34 +160,53 @@ export const MedicalReports = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        const pass = await digiYatraService.getPassport().catch(() => null);
-        setPassport(pass);
+        if (isClinician) {
+          const docReports = await doctorService.getMedicalReports().catch(() => []);
+          if (docReports && docReports.length > 0) {
+            setReports(docReports);
+            const pMap = new Map();
+            docReports.forEach((r) => {
+              if (r.patient_id && !pMap.has(r.patient_id)) {
+                pMap.set(r.patient_id, {
+                  id: r.patient_id,
+                  name: r.patient_name,
+                  medi_connect_id: r.medi_connect_id,
+                });
+              }
+            });
+            setPatientList(Array.from(pMap.values()));
+          } else {
+            setReports(INITIAL_REPORTS);
+          }
+        } else {
+          const pass = await digiYatraService.getPassport().catch(() => null);
+          setPassport(pass);
 
-        const apiReports = await digiYatraService.getMedicalReports().catch(() => []);
-        if (apiReports && apiReports.length > 0) {
-          // Format API reports and combine with defaults if not already present
-          const formattedApi = apiReports.map((r) => ({
-            id: r.id || `api-${Math.random()}`,
-            test_name: r.test_name,
-            category: r.category || 'General Diagnostic',
-            facility_name: 'Participating Health Grid Facility',
-            doctor_name: 'Attending Physician',
-            test_date: r.test_date || new Date().toISOString(),
-            status: r.result_summary?.toLowerCase().includes('abnormal') || r.result_summary?.toLowerCase().includes('high') ? 'attention' : 'normal',
-            status_label: r.result_summary?.toLowerCase().includes('abnormal') ? 'Requires Attention' : 'Verified & Signed',
-            connection_context: 'Digitally authenticated across Medi-Connect Longitudinal Care Grid.',
-            result_summary: r.result_summary || 'Clinical findings verified and uploaded to patient record.',
-            parameters: [
-              { name: 'Diagnostic Result', value: 'Recorded', ref: 'Clinical Standards', status: 'normal' },
-            ],
-            verified: true,
-          }));
+          const apiReports = await digiYatraService.getMedicalReports().catch(() => []);
+          if (apiReports && apiReports.length > 0) {
+            const formattedApi = apiReports.map((r) => ({
+              id: r.id || `api-${Math.random()}`,
+              test_name: r.test_name,
+              category: r.category || 'General Diagnostic',
+              facility_name: 'Participating Health Grid Facility',
+              doctor_name: 'Attending Physician',
+              test_date: r.test_date || new Date().toISOString(),
+              status: r.result_summary?.toLowerCase().includes('abnormal') || r.result_summary?.toLowerCase().includes('high') ? 'attention' : 'normal',
+              status_label: r.result_summary?.toLowerCase().includes('abnormal') ? 'Requires Attention' : 'Verified & Signed',
+              connection_context: 'Digitally authenticated across Medi-Connect Longitudinal Care Grid.',
+              result_summary: r.result_summary || 'Clinical findings verified and uploaded to patient record.',
+              parameters: [
+                { name: 'Diagnostic Result', value: 'Recorded', ref: 'Clinical Standards', status: 'normal' },
+              ],
+              verified: true,
+            }));
 
-          // Avoid duplicates by test_name
-          const existingNames = new Set(formattedApi.map((x) => x.test_name));
-          const complementary = INITIAL_REPORTS.filter((x) => !existingNames.has(x.test_name));
-          setReports([...formattedApi, ...complementary]);
+            const existingNames = new Set(formattedApi.map((x) => x.test_name));
+            const complementary = INITIAL_REPORTS.filter((x) => !existingNames.has(x.test_name));
+            setReports([...formattedApi, ...complementary]);
+          }
         }
       } catch (err) {
         console.error('Failed to load reports:', err);
@@ -185,7 +215,7 @@ export const MedicalReports = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [isClinician]);
 
   const handleAddReport = async (e) => {
     e.preventDefault();
@@ -248,17 +278,31 @@ export const MedicalReports = () => {
 
   const categories = ['All', 'Pathology & Blood', 'Cardiology & ECG', 'Radiology & Scans', 'Biochemistry & Panels'];
 
+  const quickTestFilters = [
+    { label: 'All Tests', query: '' },
+    { label: '12-Lead ECG', query: 'ECG' },
+    { label: 'Lipid Profile', query: 'Lipid' },
+    { label: 'Glucose & HbA1c', query: 'HbA1c' },
+    { label: 'Chest X-Ray', query: 'X-Ray' },
+    { label: 'Blood Gas (ABG)', query: 'Blood Gas' },
+  ];
+
   const filteredReports = reports.filter((r) => {
-    const matchesSearch = 
-      r.test_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.facility_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.doctor_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.result_summary?.toLowerCase().includes(searchTerm.toLowerCase());
+    const q = searchTerm.toLowerCase().trim();
+    const matchesSearch = !q ||
+      r.test_name?.toLowerCase().includes(q) ||
+      r.patient_name?.toLowerCase().includes(q) ||
+      r.medi_connect_id?.toLowerCase().includes(q) ||
+      r.facility_name?.toLowerCase().includes(q) ||
+      r.doctor_name?.toLowerCase().includes(q) ||
+      r.result_summary?.toLowerCase().includes(q) ||
+      r.category?.toLowerCase().includes(q);
 
-    const matchesCategory = selectedCategory === 'All' || r.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'All' || r.category?.toLowerCase().includes(selectedCategory.toLowerCase());
     const matchesStatus = selectedStatus === 'all' || r.status === selectedStatus;
+    const matchesPatient = selectedPatientId === 'ALL' || r.patient_id === selectedPatientId;
 
-    return matchesSearch && matchesCategory && matchesStatus;
+    return matchesSearch && matchesCategory && matchesStatus && matchesPatient;
   });
 
   const participatingFacilities = Array.from(new Set(reports.map((r) => r.facility_name))).filter(Boolean);
@@ -273,22 +317,24 @@ export const MedicalReports = () => {
             <div className="apollo-dash-badge-strip" style={{ marginBottom: '10px' }}>
               <span className="apollo-dash-status-pill">
                 <span className="apollo-dash-status-dot" />
-                Inter-Hospital Health Grid Active
+                {isClinician ? 'Doctor Diagnostic Repository Active' : 'Inter-Hospital Health Grid Active'}
               </span>
               <span className="apollo-dash-ai-pill">
                 <ShieldCheck size={13} />
                 ABDM Digitally Verified Records
               </span>
-              <span className="apollo-role-tag patient">
-                DigiYatra Rail
+              <span className={`apollo-role-tag ${isClinician ? 'doctor' : 'patient'}`}>
+                {isClinician ? 'Doctor Clinical Access' : 'DigiYatra Rail'}
               </span>
             </div>
 
             <h1 className="apollo-dash-title" style={{ fontSize: '1.9rem', marginBottom: '8px' }}>
-              Medical Reports & History Connection
+              {isClinician ? 'Patient Diagnostic Reports & Longitudinal History' : 'Medical Reports & History Connection'}
             </h1>
-            <p className="apollo-dash-subtitle" style={{ maxWidth: '720px' }}>
-              Your centralized diagnostic repository. When you visit a Primary Health Centre, District Hospital, or diagnostic lab, all test results, imaging scans, and pathology panels connect seamlessly to your Medi-Connect Health Passport.
+            <p className="apollo-dash-subtitle" style={{ maxWidth: '750px' }}>
+              {isClinician 
+                ? 'Centralized diagnostic records portal. Search, inspect, and filter verified clinical reports, pathology investigations, and ECG scans across patients under active hospital consent.' 
+                : 'Your centralized diagnostic repository. When you visit a Primary Health Centre, District Hospital, or diagnostic lab, all test results, imaging scans, and pathology panels connect seamlessly to your Medi-Connect Health Passport.'}
             </p>
           </div>
 
@@ -302,12 +348,12 @@ export const MedicalReports = () => {
               <span>Connect / Add Report</span>
             </button>
             <Link
-              to="/consent"
+              to={isClinician ? '/' : '/consent'}
               className="apollo-dash-btn-secondary"
               style={{ padding: '10px 18px', fontSize: '0.86rem' }}
             >
-              <Share2 size={16} />
-              <span>Manage Consent</span>
+              {isClinician ? <Activity size={16} /> : <Share2 size={16} />}
+              <span>{isClinician ? 'Consultation Queue' : 'Manage Consent'}</span>
             </Link>
           </div>
         </div>
@@ -417,17 +463,108 @@ export const MedicalReports = () => {
         </div>
 
         {/* 3. Search & Category Filters */}
-        <div className="reports-filter-bar">
-          <div style={{ position: 'relative', flex: 1, minWidth: '280px' }}>
-            <Search size={16} color="#94A3B8" style={{ position: 'absolute', left: '12px', top: '13px' }} />
-            <input
-              type="text"
-              placeholder="Search reports by test name, facility, physician, or biomarker..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="reports-search-input"
-              style={{ paddingLeft: '38px' }}
-            />
+        {/* 3. Search & Category Filters */}
+        <div className="reports-filter-bar" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', width: '100%', alignItems: 'center' }}>
+            <div style={{ position: 'relative', flex: 1, minWidth: '300px' }}>
+              <Search size={16} color="#2563EB" style={{ position: 'absolute', left: '14px', top: '13px' }} />
+              <input
+                type="text"
+                placeholder={isClinician ? "Search reports by test name (e.g. ECG, Lipid, Blood, X-Ray) or patient name..." : "Search reports by test name, facility, physician, or biomarker..."}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="reports-search-input"
+                style={{ paddingLeft: '40px', paddingRight: searchTerm ? '38px' : '14px', width: '100%', border: '1.5px solid #CBD5E1' }}
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  style={{ position: 'absolute', right: '12px', top: '11px', background: 'none', border: 'none', cursor: 'pointer', color: '#94A3B8' }}
+                  title="Clear search"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+
+            {isClinician && patientList.length > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Users size={16} color="#64748B" />
+                <select
+                  value={selectedPatientId}
+                  onChange={(e) => setSelectedPatientId(e.target.value)}
+                  style={{
+                    padding: '9px 14px',
+                    borderRadius: '10px',
+                    border: '1px solid #CBD5E1',
+                    background: '#FFFFFF',
+                    fontSize: '0.82rem',
+                    fontWeight: 600,
+                    color: '#1E293B',
+                    outline: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <option value="ALL">All Patients ({patientList.length})</option>
+                  {patientList.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} ({p.medi_connect_id})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              style={{
+                padding: '9px 14px',
+                borderRadius: '10px',
+                border: '1px solid #CBD5E1',
+                background: '#FFFFFF',
+                fontSize: '0.82rem',
+                fontWeight: 600,
+                color: '#334155',
+                outline: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              <option value="all">All Results</option>
+              <option value="normal">Normal Range Only</option>
+              <option value="attention">Requires Attention</option>
+            </select>
+          </div>
+
+          {/* Quick Test Name Filter Chips for Doctor */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', paddingTop: '4px' }}>
+            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Search by Report Name:
+            </span>
+            {quickTestFilters.map((qf) => {
+              const isSelected = (!qf.query && !searchTerm) || (qf.query && searchTerm.toLowerCase() === qf.query.toLowerCase());
+              return (
+                <button
+                  key={qf.label}
+                  type="button"
+                  onClick={() => setSearchTerm(qf.query)}
+                  style={{
+                    padding: '5px 12px',
+                    borderRadius: '20px',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    border: isSelected ? '1px solid #2563EB' : '1px solid #E2E8F0',
+                    background: isSelected ? '#EFF6FF' : '#F8FAFC',
+                    color: isSelected ? '#1D4ED8' : '#475569',
+                  }}
+                >
+                  {qf.label}
+                </button>
+              );
+            })}
           </div>
 
           <div className="reports-category-pills">
@@ -442,26 +579,6 @@ export const MedicalReports = () => {
               </button>
             ))}
           </div>
-
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            style={{
-              padding: '9px 14px',
-              borderRadius: '10px',
-              border: '1px solid #CBD5E1',
-              background: '#FFFFFF',
-              fontSize: '0.82rem',
-              fontWeight: 600,
-              color: '#334155',
-              outline: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            <option value="all">All Results</option>
-            <option value="normal">Normal Range Only</option>
-            <option value="attention">Requires Attention</option>
-          </select>
         </div>
 
         {/* 4. Reports List */}
@@ -476,13 +593,15 @@ export const MedicalReports = () => {
           }}>
             <ClipboardList size={36} color="#94A3B8" style={{ margin: '0 auto 12px auto' }} />
             <h3 style={{ fontSize: '1.05rem', color: '#0F172A', fontWeight: 600, marginBottom: '6px' }}>
-              No medical reports matched your filters
+              No medical reports matched your search filters
             </h3>
-            <p style={{ fontSize: '0.84rem', maxWidth: '420px', margin: '0 auto 16px auto' }}>
-              Try searching with different keywords or connect a new diagnostic report to your Medi-Connect health record.
+            <p style={{ fontSize: '0.84rem', maxWidth: '440px', margin: '0 auto 16px auto' }}>
+              {searchTerm 
+                ? `No reports found matching "${searchTerm}". Check the spelling or try searching another test name like "ECG", "Lipid", or "HbA1c".` 
+                : 'No diagnostic records available under current filter criteria.'}
             </p>
             <button
-              onClick={() => { setSearchTerm(''); setSelectedCategory('All'); setSelectedStatus('all'); }}
+              onClick={() => { setSearchTerm(''); setSelectedCategory('All'); setSelectedStatus('all'); setSelectedPatientId('ALL'); }}
               className="apollo-dash-btn-secondary"
               style={{ padding: '8px 16px', fontSize: '0.82rem' }}
             >
@@ -495,6 +614,44 @@ export const MedicalReports = () => {
               const isNormal = report.status === 'normal';
               return (
                 <div key={report.id} className="report-card">
+                  {/* Doctor View: Scoped Patient Record Tag */}
+                  {isClinician && report.patient_name && (
+                    <div style={{
+                      background: '#F0FDF4',
+                      border: '1px solid #BBF7D0',
+                      borderRadius: '8px',
+                      padding: '8px 12px',
+                      marginBottom: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      flexWrap: 'wrap',
+                      gap: '8px',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: '#DCFCE7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#16A34A' }}>
+                          <User size={14} />
+                        </div>
+                        <div>
+                          <strong style={{ color: '#14532D', fontSize: '0.9rem' }}>{report.patient_name}</strong>
+                          {report.patient_age && (
+                            <span style={{ fontSize: '0.76rem', color: '#4B5563', marginLeft: '6px' }}>
+                              ({report.patient_age} yrs, {report.patient_gender}, {report.patient_blood_group})
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '0.74rem', background: '#FFFFFF', padding: '2px 8px', borderRadius: '4px', border: '1px solid #86EFAC', color: '#166534' }}>
+                          {report.medi_connect_id}
+                        </span>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#15803D', background: '#DCFCE7', padding: '2px 6px', borderRadius: '4px' }}>
+                          Consent Scoped
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Top Meta Line */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -849,11 +1006,11 @@ export const MedicalReports = () => {
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', fontSize: '0.8rem' }}>
                     <div>
                       <span style={{ color: '#64748B', display: 'block', fontSize: '0.72rem' }}>PATIENT NAME</span>
-                      <strong>{passport?.full_name || 'Patient'}</strong>
+                      <strong>{inspectReport.patient_name || passport?.full_name || 'Verified Patient'}</strong>
                     </div>
                     <div>
                       <span style={{ color: '#64748B', display: 'block', fontSize: '0.72rem' }}>MEDI-CONNECT ID</span>
-                      <strong style={{ color: '#2563EB', fontFamily: 'monospace' }}>{passport?.medi_connect_id || 'MC-75912'}</strong>
+                      <strong style={{ color: '#2563EB', fontFamily: 'monospace' }}>{inspectReport.medi_connect_id || passport?.medi_connect_id || 'MC-75912'}</strong>
                     </div>
                     <div>
                       <span style={{ color: '#64748B', display: 'block', fontSize: '0.72rem' }}>TEST DATE</span>

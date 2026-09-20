@@ -18,7 +18,8 @@ from app.models import (
     User, Patient, SymptomReport, WearableReading, MedicalHistoryRecord,
     PatientMedication, PatientAllergy, MedicalTestRecord, CareEncounter,
     Facility, Bed, Doctor, Equipment, MedicineStock,
-    RiskAssessment, Recommendation, Referral, FollowUp
+    RiskAssessment, Recommendation, Referral, FollowUp,
+    AccessConsent, AccessAuditLog
 )
 from app.models.enums import UserRole, FacilityType, UrgencyLevel, RecommendationStatus
 
@@ -232,16 +233,167 @@ ALLERGIES_LIST = [
 ]
 
 TESTS_LIST = [
-    {"name": "12-Lead Electrocardiogram (ECG)", "cat": "Cardiology", "summary": "Normal Sinus Rhythm, 72 bpm, ST segment normal."},
-    {"name": "Fasting Blood Glucose & HbA1c", "cat": "Pathology", "summary": "HbA1c: 6.8% (Fair control), Fasting Glucose: 118 mg/dL."},
-    {"name": "Lipid Profile Panel", "cat": "Pathology", "summary": "Total Cholesterol: 195 mg/dL, LDL: 110 mg/dL, HDL: 45 mg/dL."},
-    {"name": "Chest X-Ray PA View", "cat": "Radiology", "summary": "Lung fields clear, cardiothoracic ratio within normal limits."},
-    {"name": "Arterial Blood Gas (ABG)", "cat": "Pulmonology", "summary": "pH 7.41, PaO2 94 mmHg, PaCO2 38 mmHg, SpO2 98%."},
+    # Cardiology & Cardiac Markers
+    {
+        "name": "12-Lead Electrocardiogram (ECG)",
+        "cat": "Cardiology & ECG",
+        "summary": "Normal Sinus Rhythm at 74 bpm, normal PR interval (156 ms) and QRS duration (88 ms). No ST elevation or pathological Q waves.",
+    },
+    {
+        "name": "High-Sensitivity Cardiac Troponin-I (hs-cTnI)",
+        "cat": "Cardiology & ECG",
+        "summary": "hs-cTnI: 0.012 ng/mL (Normal Reference < 0.034 ng/mL). Negative for acute myocardial injury.",
+    },
+    {
+        "name": "Cardiac Troponin-T Rapid Assay",
+        "cat": "Cardiology & ECG",
+        "summary": "Troponin-T: 0.88 ng/mL (High / Critical). Highly suspicious for acute myocardial ischemia. Immediate cardiology review advised.",
+    },
+    {
+        "name": "2D Echocardiogram & Color Doppler",
+        "cat": "Cardiology & ECG",
+        "summary": "Left ventricular ejection fraction (LVEF) 58%. Mild concentric LV hypertrophy. No regional wall motion abnormalities or significant valvular regurgitation.",
+    },
+    {
+        "name": "Serum Creatine Kinase-MB (CK-MB)",
+        "cat": "Cardiology & ECG",
+        "summary": "CK-MB: 18 U/L (Normal Reference: 5 - 25 U/L). Index normal, no evidence of acute ischemic muscle damage.",
+    },
+    {
+        "name": "NT-proBNP Heart Failure Biomarker",
+        "cat": "Cardiology & ECG",
+        "summary": "NT-proBNP: 185 pg/mL (Normal < 300 pg/mL). Low clinical probability of acute congestive heart failure decompensation.",
+    },
+
+    # Pathology & Hematology
+    {
+        "name": "Complete Blood Count (CBC) with 5-Part Differential",
+        "cat": "Pathology & Blood",
+        "summary": "Hb: 14.2 g/dL, WBC: 7,400/mcL, Platelets: 260,000/mcL, Neutrophils: 64%, Lymphocytes: 28%. Normocytic normochromic red cell indices.",
+    },
+    {
+        "name": "Erythrocyte Sedimentation Rate (ESR - Westergren)",
+        "cat": "Pathology & Blood",
+        "summary": "ESR: 28 mm/hr (Mildly Elevated, Ref: 0 - 20 mm/hr). Indicates subacute systemic inflammatory or infectious response.",
+    },
+    {
+        "name": "Prothrombin Time & INR (PT/INR Coagulation Panel)",
+        "cat": "Pathology & Blood",
+        "summary": "PT: 12.8 sec, INR: 1.05 (Therapeutic / Normal Reference). Adequate intrinsic and extrinsic coagulation pathway integrity.",
+    },
+    {
+        "name": "Serum Ferritin & Iron Deficiency Profile",
+        "cat": "Pathology & Blood",
+        "summary": "Serum Ferritin: 18 ng/mL (Low, Ref: 30 - 300 ng/mL), Serum Iron: 42 ug/dL, TIBC: 410 ug/dL. Microcytic hypochromic iron deficiency pattern.",
+    },
+    {
+        "name": "D-Dimer Quantitative Plasma Assay",
+        "cat": "Pathology & Blood",
+        "summary": "D-Dimer: 320 ng/mL FEU (Normal < 500 ng/mL). Venous thromboembolism / pulmonary embolism ruled out.",
+    },
+
+    # Biochemistry, Metabolic & Endocrine
+    {
+        "name": "Lipid Profile Panel",
+        "cat": "Biochemistry & Panels",
+        "summary": "Total Cholesterol: 238 mg/dL (Elevated), LDL: 152 mg/dL (Borderline High), HDL: 44 mg/dL, Triglycerides: 195 mg/dL. Statin therapy & lifestyle counseling indicated.",
+    },
+    {
+        "name": "Fasting Blood Glucose & HbA1c Screening",
+        "cat": "Biochemistry & Panels",
+        "summary": "Fasting Glucose: 138 mg/dL, HbA1c: 7.4% (Suboptimal Glycemic Control). Consistent with established Type 2 Diabetes Mellitus.",
+    },
+    {
+        "name": "Comprehensive Metabolic Panel (CMP - 14 Parameters)",
+        "cat": "Biochemistry & Panels",
+        "summary": "Serum Creatinine: 0.92 mg/dL, eGFR: 92 mL/min, BUN: 14 mg/dL, Sodium: 140 mEq/L, Potassium: 4.3 mEq/L, Calcium: 9.4 mg/dL. Normal metabolic baseline.",
+    },
+    {
+        "name": "Liver Function Test (LFT Profile)",
+        "cat": "Biochemistry & Panels",
+        "summary": "SGOT/AST: 34 U/L, SGPT/ALT: 42 U/L, Total Bilirubin: 0.8 mg/dL, Alkaline Phosphatase: 88 U/L, Albumin: 4.2 g/dL. Hepatic cellular enzymes within normal limits.",
+    },
+    {
+        "name": "Kidney Function & Serum Creatinine (KFT)",
+        "cat": "Biochemistry & Panels",
+        "summary": "Serum Creatinine: 1.65 mg/dL (Elevated, Ref: 0.7 - 1.2 mg/dL), BUN: 32 mg/dL, eGFR: 48 mL/min/1.73m2. Suggestive of moderate CKD Stage 3a.",
+    },
+    {
+        "name": "Thyroid Stimulating Hormone (TSH 3rd Gen)",
+        "cat": "Biochemistry & Panels",
+        "summary": "TSH: 6.85 uIU/mL (Elevated, Ref: 0.45 - 4.50 uIU/mL), Free T4: 0.98 ng/dL. Subclinical primary hypothyroidism.",
+    },
+    {
+        "name": "Serum Electrolytes Panel (Na, K, Cl, HCO3)",
+        "cat": "Biochemistry & Panels",
+        "summary": "Sodium: 138 mEq/L, Potassium: 3.9 mEq/L, Chloride: 102 mEq/L, Bicarbonate: 24 mEq/L. Balanced electrolyte equilibrium.",
+    },
+    {
+        "name": "Serum Uric Acid Assay",
+        "cat": "Biochemistry & Panels",
+        "summary": "Serum Uric Acid: 8.4 mg/dL (High, Ref: 3.5 - 7.2 mg/dL). Hyperuricemia with clinical gout correlation.",
+    },
+
+    # Radiology & Imaging
+    {
+        "name": "Digital Chest X-Ray (PA View)",
+        "cat": "Radiology & Scans",
+        "summary": "Bilateral lung fields clear. Costophrenic and cardiophrenic angles sharp. Cardiothoracic ratio 0.45 (Normal). Bony rib cage unremarkable.",
+    },
+    {
+        "name": "High-Resolution CT (HRCT) Chest",
+        "cat": "Radiology & Scans",
+        "summary": "No focal consolidation, ground glass opacities, or bronchiectasis. Normal mediastinal contour without significant lymphadenopathy.",
+    },
+    {
+        "name": "Ultrasound Whole Abdomen & Pelvis",
+        "cat": "Radiology & Scans",
+        "summary": "Mild Grade-I diffuse hepatic steatosis (Fatty Liver). Gallbladder, pancreas, spleen, and bilateral kidneys show preserved parenchymal thickness.",
+    },
+    {
+        "name": "MRI Brain with Diffusion Weighted Imaging (DWI)",
+        "cat": "Radiology & Scans",
+        "summary": "No evidence of acute ischemic stroke, intracranial hemorrhage, or space-occupying lesion. Ventricular size commensurate with age.",
+    },
+    {
+        "name": "CT Coronary Angiography",
+        "cat": "Radiology & Scans",
+        "summary": "LAD demonstrates 30-40% soft eccentric proximal plaque without flow-limiting stenosis. RCA and LCx patent.",
+    },
+
+    # Pulmonology & Respiratory
+    {
+        "name": "Arterial Blood Gas (ABG)",
+        "cat": "Pulmonology & Respiratory",
+        "summary": "pH: 7.42, PaO2: 96 mmHg, PaCO2: 37 mmHg, HCO3: 24.2 mEq/L, SpO2: 98.4%, Lactate: 1.1 mmol/L. Normal alveolar gas exchange without acidosis.",
+    },
+    {
+        "name": "Spirometry & Pulmonary Function Test (PFT)",
+        "cat": "Pulmonology & Respiratory",
+        "summary": "FEV1/FVC ratio: 0.68 (Reduced, Ref > 0.75). Positive post-bronchodilator reversibility of 14% (250 mL), consistent with mild reversible obstructive airway disease (Asthma).",
+    },
+
+    # Infectious Disease & Serology
+    {
+        "name": "Dengue NS1 Antigen & IgM/IgG Serology",
+        "cat": "Pathology & Blood",
+        "summary": "Dengue NS1 Antigen: NEGATIVE, Dengue IgM: NEGATIVE, Dengue IgG: POSITIVE (Indicates past resolved exposure).",
+    },
+    {
+        "name": "C-Reactive Protein (Quantitative hs-CRP)",
+        "cat": "Pathology & Blood",
+        "summary": "hs-CRP: 12.4 mg/L (High, Ref < 3.0 mg/L). Significant systemic inflammatory marker elevation.",
+    },
+    {
+        "name": "Urine Routine & Microscopic Examination",
+        "cat": "Pathology & Blood",
+        "summary": "Color: Pale yellow, Protein: Nil, Glucose: Nil, Pus cells: 2-3 /HPF, RBCs: Nil, Epithelial cells: Few. Negative for active urinary tract infection.",
+    },
 ]
 
 
 async def seed_database():
-    print("🌱 Initializing Smart Health Grid Indore Data Seeder...")
+    print("[INIT] Initializing Smart Health Grid Indore Data Seeder...")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
@@ -320,10 +472,12 @@ async def seed_database():
 
         await db.commit()
 
-        # 3. Create 15 Fake Patients with realistic histories, vitals, symptoms
-        print("👥 Seeding 15 realistic patient profiles in Indore...")
-        patient_users = []
-        for i in range(15):
+        # 3. Create 25 Diverse Patients with realistic histories, vitals, symptoms, diagnostic reports, and consents
+        print("[SEEDS] Seeding 25 realistic patient profiles in Indore...")
+        total_reports_seeded = 0
+        total_consents_seeded = 0
+
+        for i in range(25):
             fname = fake.name_female() if i % 2 == 0 else fake.name_male()
             email = f"patient{i+1}@healthgrid.in"
             user = User(
@@ -335,19 +489,20 @@ async def seed_database():
             db.add(user)
             await db.flush()
 
-            dob = datetime.utcnow() - timedelta(days=random.randint(7000, 25000))
-            # Indore location offset
-            lat = 22.7196 + random.uniform(-0.04, 0.04)
-            lng = 75.8577 + random.uniform(-0.04, 0.04)
+            dob = datetime.utcnow() - timedelta(days=random.randint(7000, 26000))
+            lat = 22.7196 + random.uniform(-0.045, 0.045)
+            lng = 75.8577 + random.uniform(-0.045, 0.045)
 
+            mc_id = f"MC-{random.randint(10000, 99999)}"
             patient = Patient(
                 user_id=user.id,
                 date_of_birth=dob,
                 gender="FEMALE" if i % 2 == 0 else "MALE",
-                blood_group=random.choice(["A+", "B+", "O+", "AB+", "O-", "A-"]),
+                blood_group=random.choice(["A+", "B+", "O+", "AB+", "O-", "A-", "B-"]),
                 wearable_device_id=f"IOT-INDORE-WATCH-{1000 + i}",
                 location_lat=lat,
                 location_lng=lng,
+                medi_connect_id=mc_id,
             )
             db.add(patient)
             await db.flush()
@@ -359,8 +514,8 @@ async def seed_database():
                 db.add(MedicalHistoryRecord(
                     patient_id=patient.id,
                     condition=cond,
-                    notes=f"Diagnosed during routine health checkup. Patient managed with lifestyle & meds.",
-                    diagnosed_at=datetime.utcnow() - timedelta(days=random.randint(100, 1000))
+                    notes=f"Diagnosed during health checkup. Patient managed with lifestyle modifications and routine clinical follow-up.",
+                    diagnosed_at=datetime.utcnow() - timedelta(days=random.randint(100, 1200))
                 ))
 
             # Seed Medications
@@ -377,7 +532,7 @@ async def seed_database():
                 ))
 
             # Seed Allergies
-            if random.random() > 0.4:
+            if random.random() > 0.35:
                 alg = random.choice(ALLERGIES_LIST)
                 db.add(PatientAllergy(
                     patient_id=patient.id,
@@ -386,8 +541,8 @@ async def seed_database():
                     reaction=alg["reaction"]
                 ))
 
-            # Seed Medical Tests
-            num_tests = random.randint(1, 2)
+            # Seed Medical Tests / Reports (2 to 4 reports per patient from the expanded 24-test catalog)
+            num_tests = random.randint(2, 4)
             chosen_tests = random.sample(TESTS_LIST, num_tests)
             for t in chosen_tests:
                 db.add(MedicalTestRecord(
@@ -395,25 +550,42 @@ async def seed_database():
                     test_name=t["name"],
                     category=t["cat"],
                     result_summary=t["summary"],
-                    test_date=datetime.utcnow() - timedelta(days=random.randint(10, 150))
+                    test_date=datetime.utcnow() - timedelta(days=random.randint(1, 140), hours=random.randint(0, 23))
                 ))
+                total_reports_seeded += 1
 
-            # Seed Symptoms & Vitals (Normal vs Critical scenario)
-            is_emergency_scenario = (i % 4 == 0)
+            # Seed Active DigiYatra Visit Consent for the doctor consultation queue
+            consent_fac = created_facilities[0] if i % 2 == 0 else created_facilities[1]
+            consent_dept = "Cardiology & Critical Care" if i % 2 == 0 else "General Medicine & Outpatient"
+            db.add(AccessConsent(
+                patient_id=patient.id,
+                facility_name=consent_fac.name,
+                department=consent_dept,
+                requested_by_role="doctor",
+                status="active",
+                scopes=["basic_profile", "allergies", "medications", "medical_history", "vitals", "tests"],
+                duration="24h",
+                granted_at=datetime.utcnow() - timedelta(hours=random.randint(1, 8)),
+                expires_at=datetime.utcnow() + timedelta(hours=random.randint(6, 22)),
+            ))
+            total_consents_seeded += 1
+
+            # Seed Symptoms & Vitals (Normal vs Critical scenarios)
+            is_emergency_scenario = (i % 3 == 0)
             if is_emergency_scenario:
-                spo2 = random.randint(84, 89)
-                hr = random.randint(132, 145)
-                sys_bp = random.randint(182, 195)
-                temp = round(random.uniform(38.8, 39.8), 1)
+                spo2 = random.randint(84, 90)
+                hr = random.randint(128, 148)
+                sys_bp = random.randint(178, 198)
+                temp = round(random.uniform(38.6, 39.8), 1)
                 syms = {"chest_pain": True, "shortness_of_breath": True, "dizziness": True, "severity": 9}
-                chief = "Sudden onset severe crushing substernal chest pain with profuse sweating"
+                chief = "Acute crushing substernal chest discomfort radiating to left arm with diaphoresis and dyspnea"
             else:
                 spo2 = random.randint(96, 99)
-                hr = random.randint(68, 84)
-                sys_bp = random.randint(118, 128)
+                hr = random.randint(66, 82)
+                sys_bp = random.randint(116, 126)
                 temp = round(random.uniform(36.6, 37.2), 1)
                 syms = {"fever": True, "cough": True, "mild_fatigue": True, "severity": 4}
-                chief = "Mild fever and persistent dry cough for 3 days"
+                chief = "Mild low-grade fever with productive dry cough and generalized body aches for 3 days"
 
             symptom_report = SymptomReport(
                 patient_id=patient.id,
@@ -428,7 +600,7 @@ async def seed_database():
                 heart_rate=hr,
                 spo2=spo2,
                 blood_pressure_sys=sys_bp,
-                blood_pressure_dia=random.randint(75, 95),
+                blood_pressure_dia=random.randint(76, 96),
                 body_temp_c=temp,
                 recorded_at=datetime.utcnow() - timedelta(minutes=random.randint(5, 60))
             )
@@ -436,8 +608,7 @@ async def seed_database():
             await db.flush()
 
             # Seed Risk Assessment
-            risk_score = 9.5 if is_emergency_scenario else 4.2
-            urgency_str = "CRITICAL" if is_emergency_scenario else "ROUTINE"
+            risk_score = 9.4 if is_emergency_scenario else 4.2
             risk_assessment = RiskAssessment(
                 patient_id=patient.id,
                 symptom_report_id=symptom_report.id,
@@ -456,11 +627,10 @@ async def seed_database():
                 patient_id=patient.id,
                 risk_assessment_id=risk_assessment.id,
                 recommended_specialty=rec_spec,
-                recommended_service="ECG & ICU Monitoring" if is_emergency_scenario else "Outpatient Consultation",
+                recommended_service="12-Lead ECG & Urgent ICU Monitoring" if is_emergency_scenario else "Outpatient Consultation & Routine Diagnostics",
                 status=RecommendationStatus.ACCEPTED,
                 created_at=datetime.utcnow() - timedelta(minutes=10)
             )
-
             db.add(recommendation)
             await db.flush()
 
@@ -469,7 +639,7 @@ async def seed_database():
             referral = Referral(
                 recommendation_id=recommendation.id,
                 facility_id=assigned_fac.id,
-                navigation_notes=f"Routed to {assigned_fac.name} via Emergency Ambulance Corridor.",
+                navigation_notes=f"Routed to {assigned_fac.name} via Emergency Ambulance Corridor." if is_emergency_scenario else f"Scheduled consultation at {assigned_fac.name}.",
                 emergency_alert_sent=is_emergency_scenario,
                 created_at=datetime.utcnow() - timedelta(minutes=5)
             )
@@ -482,7 +652,7 @@ async def seed_database():
                 referral_id=referral.id,
                 scheduled_at=datetime.utcnow() + timedelta(days=7),
                 completed=False,
-                notes="7-day post-triage clinical review scheduled."
+                notes="7-day post-triage clinical review and diagnostic report inspection scheduled."
             ))
 
             db.add(CareEncounter(
@@ -490,12 +660,12 @@ async def seed_database():
                 facility_id=assigned_fac.id,
                 chief_complaint=chief,
                 diagnosis=f"Triage Evaluation: {rec_spec.title()}",
-                treatment_notes="Patient received initial stabilization and treatment plan.",
+                treatment_notes="Patient received initial clinical stabilization, baseline vitals intake, and diagnostic test referral.",
                 encounter_date=datetime.utcnow()
             ))
 
         await db.commit()
-        print("✅ Database successfully seeded with rich Indore healthcare data!")
+        print(f"[SUCCESS] Database successfully seeded with 25 patients, {total_reports_seeded} diagnostic reports, and {total_consents_seeded} active consents!")
 
 if __name__ == "__main__":
     asyncio.run(seed_database())
