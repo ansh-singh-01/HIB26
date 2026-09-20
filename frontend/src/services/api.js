@@ -233,8 +233,8 @@ export const digiYatraService = {
     const res = await api.post('/api/v1/patients/terminal/action', data);
     return res.data;
   },
-  getMedicalReports: async () => {
-    const res = await api.get('/api/v1/patients/me/medical-tests');
+  getMedicalReports: async (params = {}) => {
+    const res = await api.get('/api/v1/patients/me/medical-tests', { params });
     return res.data;
   },
   addMedicalReport: async (data) => {
@@ -262,6 +262,17 @@ export const doctorService = {
   },
   recordEncounter: async (data) => {
     const res = await api.post('/api/v1/patients/doctor/encounter', data);
+    return res.data;
+  },
+  getMedicalReports: async (params = {}) => {
+    const res = await api.get('/api/v1/patients/doctor/medical-reports', { params });
+    return res.data;
+  },
+  searchReportsByName: async (name = '', category = 'All') => {
+    const params = {};
+    if (name) params.name = name;
+    if (category && category !== 'All') params.category = category;
+    const res = await api.get('/api/v1/patients/doctor/medical-reports', { params });
     return res.data;
   },
 };

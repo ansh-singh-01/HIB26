@@ -15,8 +15,20 @@ import {
   ArrowRight,
   ShieldAlert,
   Building2,
-  FileText
+  FileText,
+  Locate,
+  Compass,
+  MapPin,
+  Navigation,
+  Radio
 } from 'lucide-react';
+import {
+  getCurrentGPSCoordinates,
+  INDORE_LANDMARK_PRESETS,
+  getGoogleMapsNavUrl,
+  INDORE_DEFAULT_LAT,
+  INDORE_DEFAULT_LNG
+} from '../utils/geo';
 
 export const TriageRiskAssessment = () => {
   const navigate = useNavigate();
@@ -39,8 +51,15 @@ export const TriageRiskAssessment = () => {
   const [chiefComplaint, setChiefComplaint] = useState('');
   const [symptomsInput, setSymptomsInput] = useState('');
   const [medicalHistory, setMedicalHistory] = useState('');
-  const [latitude, setLatitude] = useState(22.7196);
-  const [longitude, setLongitude] = useState(75.8577);
+  
+  // GPS State
+  const [latitude, setLatitude] = useState(INDORE_DEFAULT_LAT);
+  const [longitude, setLongitude] = useState(INDORE_DEFAULT_LNG);
+  const [locationName, setLocationName] = useState('Indore Central (Rajwada)');
+  const [isLiveGPS, setIsLiveGPS] = useState(false);
+  const [gpsAccuracy, setGpsAccuracy] = useState(null);
+  const [gpsDetecting, setGpsDetecting] = useState(false);
+  const [gpsStatusMessage, setGpsStatusMessage] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [assessmentResult, setAssessmentResult] = useState(null);
@@ -63,14 +82,46 @@ export const TriageRiskAssessment = () => {
       const selected = patients.find(p => p.id === pId);
       if (selected) {
         if (selected.medical_history) setMedicalHistory(selected.medical_history.join(', '));
-        if (selected.current_location_lat) setLatitude(selected.current_location_lat);
-        if (selected.current_location_lng) setLongitude(selected.current_location_lng);
+        if (selected.location_lat) setLatitude(selected.location_lat);
+        if (selected.location_lng) setLongitude(selected.location_lng);
+        setLocationName(`Patient Registered GPS: ${selected.full_name}`);
       }
     }
   };
 
   const handleVitalChange = (field, value) => {
     setVitals(prev => ({ ...prev, [field]: parseFloat(value) || 0 }));
+  };
+
+  // Acquire Live GPS Coordinates
+  const handleAcquireLiveGPS = async () => {
+    setGpsDetecting(true);
+    setGpsStatusMessage('Acquiring device GPS fix...');
+    try {
+      const coords = await getCurrentGPSCoordinates();
+      setLatitude(coords.latitude);
+      setLongitude(coords.longitude);
+      setIsLiveGPS(true);
+      setGpsAccuracy(coords.accuracy);
+      setLocationName('My Device Live GPS');
+      setGpsStatusMessage(`GPS Locked! Accuracy ±${coords.accuracy}m`);
+      setTimeout(() => setGpsStatusMessage(''), 5000);
+    } catch (err) {
+      setGpsStatusMessage(err.message);
+      setTimeout(() => setGpsStatusMessage(''), 6000);
+    } finally {
+      setGpsDetecting(false);
+    }
+  };
+
+  const handleSelectPreset = (preset) => {
+    setLatitude(preset.lat);
+    setLongitude(preset.lng);
+    setLocationName(`${preset.name} (${preset.area})`);
+    setIsLiveGPS(false);
+    setGpsAccuracy(null);
+    setGpsStatusMessage(`Location set to ${preset.name}`);
+    setTimeout(() => setGpsStatusMessage(''), 3000);
   };
 
   const handleAssessRisk = async (e) => {
@@ -138,65 +189,48 @@ export const TriageRiskAssessment = () => {
       <div className="flex items-center justify-between" style={{ marginBottom: '24px' }}>
         <div>
           <h1 style={{ fontSize: '1.8rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Stethoscope color="#06b6d4" /> Real-time Clinical AI Triage
+            <Stethoscope color="#06b6d4" /> AI Emergency Triage & Capacity Routing
           </h1>
           <p style={{ color: 'var(--text-muted)' }}>
-            Enter patient vital signs and clinical presentation to generate hybrid NEWS2 + Gemini LLM triage scores.
+            Real-time hybrid clinical evaluation combining physiological NEWS2 scoring with Gemini AI risk assessment and live GPS corridor routing.
           </p>
         </div>
       </div>
 
-      {error && (
-        <div style={{
-          background: 'rgba(244, 63, 94, 0.12)',
-          border: '1px solid rgba(244, 63, 94, 0.3)',
-          borderRadius: 'var(--radius-sm)',
-          padding: '14px',
-          marginBottom: '20px',
-          color: '#fb7185',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px'
-        }}>
-          <AlertTriangle size={20} />
-          <span>{error}</span>
-        </div>
-      )}
-
-      <div className="grid grid-cols-2" style={{ alignItems: 'start' }}>
-        {/* Left Input Form Column */}
+      <div className="grid grid-cols-2" style={{ gap: '24px', alignItems: 'start' }}>
+        {/* Left: Input Form */}
         <div className="glass-card" style={{ padding: '28px' }}>
-          <h2 style={{ fontSize: '1.2rem', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Activity color="#06b6d4" size={20} /> Patient Vital Signs & Symptoms
+          <h2 style={{ fontSize: '1.25rem', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Activity color="#06b6d4" size={20} /> Patient Clinical Intake
           </h2>
 
+          {error && (
+            <div style={{ background: '#FFF1F2', border: '1px solid #FECDD3', padding: '12px 16px', borderRadius: '8px', color: '#BE123C', marginBottom: '16px', fontSize: '0.88rem' }}>
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleAssessRisk}>
-            {/* If patient, show their own profile indicator; If clinician/admin, show patient selector */}
-            {isPatient ? (
-              <div style={{ background: '#F8FAFC', border: '1px solid var(--border-color)', padding: '12px 16px', borderRadius: '10px', marginBottom: '18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div>
-                  <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', display: 'block', fontWeight: '500' }}>Triage Assessment Subject</span>
-                  <strong style={{ fontSize: '0.94rem', color: 'var(--text-main)' }}>{user?.full_name || user?.email}</strong>
-                </div>
-                <span className="badge badge-low">Personal Account</span>
+            {/* Patient Selector for Clinicians */}
+            {!isPatient && (
+              <div className="form-group">
+                <label className="form-label">Select Patient from Directory (Optional)</label>
+                <select
+                  className="form-select"
+                  value={selectedPatientId}
+                  onChange={handlePatientSelect}
+                >
+                  <option value="">-- New / Walk-In Triage Patient --</option>
+                  {patients.map(p => (
+                    <option key={p.id} value={p.id}>
+                      {p.full_name} ({p.gender}, {p.blood_group}) - {p.medi_connect_id || p.id.substring(0, 8)}
+                    </option>
+                  ))}
+                </select>
               </div>
-            ) : (
-              patients.length > 0 && (
-                <div className="form-group">
-                  <label className="form-label">Select Registered Patient (Optional)</label>
-                  <select className="form-select" value={selectedPatientId} onChange={handlePatientSelect}>
-                    <option value="">-- Quick Select Existing Patient --</option>
-                    {patients.map(p => (
-                      <option key={p.id} value={p.id}>
-                        {p.full_name} ({p.gender}, Age: {p.date_of_birth ? new Date().getFullYear() - new Date(p.date_of_birth).getFullYear() : 'N/A'})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )
             )}
 
-            {/* Vital Signs Grid */}
+            {/* Vitals Grid */}
             <div style={{ background: '#F8FAFC', padding: '18px', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '20px' }}>
               <span style={{ fontSize: '0.82rem', fontWeight: '700', color: '#2563EB', textTransform: 'uppercase', display: 'block', marginBottom: '14px', letterSpacing: '0.04em' }}>
                 Physiological Vitals
@@ -321,6 +355,99 @@ export const TriageRiskAssessment = () => {
               />
             </div>
 
+            {/* GPS Emergency Geolocation Section */}
+            <div style={{
+              background: isLiveGPS ? '#F0FDF4' : '#F8FAFC',
+              border: isLiveGPS ? '1px solid #86EFAC' : '1px solid var(--border-color)',
+              padding: '16px',
+              borderRadius: '12px',
+              marginBottom: '20px'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Compass size={16} color={isLiveGPS ? '#16A34A' : '#2563EB'} />
+                  <strong style={{ fontSize: '0.85rem', color: isLiveGPS ? '#15803D' : '#1E293B', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    Emergency GPS Geotagging
+                  </strong>
+                </div>
+                {isLiveGPS && (
+                  <span className="badge badge-low flex items-center gap-1" style={{ fontSize: '0.7rem' }}>
+                    <Radio size={10} className="animate-pulse" /> Live Fix
+                  </span>
+                )}
+              </div>
+
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                Used by emergency routing algorithms to dispatch ambulances and calculate exact transit corridors to nearest available ICU beds.
+              </p>
+
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={handleAcquireLiveGPS}
+                  disabled={gpsDetecting}
+                  className="btn btn-primary btn-sm flex items-center gap-1"
+                  style={{ fontSize: '0.78rem' }}
+                >
+                  <Locate size={14} className={gpsDetecting ? 'animate-spin' : ''} />
+                  {gpsDetecting ? 'Acquiring GPS...' : 'Acquire Patient GPS'}
+                </button>
+
+                <select
+                  className="form-select"
+                  style={{ flex: 1, minWidth: '160px', padding: '6px 10px', fontSize: '0.78rem' }}
+                  value={INDORE_LANDMARK_PRESETS.some(p => p.name.includes(locationName)) ? locationName : ''}
+                  onChange={(e) => {
+                    const preset = INDORE_LANDMARK_PRESETS.find(p => p.name === e.target.value);
+                    if (preset) handleSelectPreset(preset);
+                  }}
+                >
+                  <option value="" disabled>City Landmark Presets</option>
+                  {INDORE_LANDMARK_PRESETS.map((p, idx) => (
+                    <option key={idx} value={p.name}>
+                      {p.name} ({p.area})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2" style={{ gap: '10px' }}>
+                <div>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', display: 'block', marginBottom: '2px' }}>Latitude</span>
+                  <input
+                    type="number"
+                    step="0.0001"
+                    className="form-input"
+                    style={{ padding: '6px 10px', fontSize: '0.82rem' }}
+                    value={latitude}
+                    onChange={(e) => setLatitude(parseFloat(e.target.value) || INDORE_DEFAULT_LAT)}
+                  />
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', display: 'block', marginBottom: '2px' }}>Longitude</span>
+                  <input
+                    type="number"
+                    step="0.0001"
+                    className="form-input"
+                    style={{ padding: '6px 10px', fontSize: '0.82rem' }}
+                    value={longitude}
+                    onChange={(e) => setLongitude(parseFloat(e.target.value) || INDORE_DEFAULT_LNG)}
+                  />
+                </div>
+              </div>
+
+              {gpsStatusMessage && (
+                <div style={{
+                  marginTop: '8px',
+                  fontSize: '0.78rem',
+                  color: gpsStatusMessage.includes('Locked') || gpsStatusMessage.includes('set') ? '#16A34A' : '#DC2626',
+                  fontWeight: 600
+                }}>
+                  {gpsStatusMessage}
+                </div>
+              )}
+            </div>
+
             <button
               type="submit"
               disabled={loading}
@@ -328,107 +455,115 @@ export const TriageRiskAssessment = () => {
               style={{ width: '100%', padding: '14px', marginTop: '10px' }}
             >
               {loading ? (
-                <>
-                  <Sparkles size={18} className="animate-spin" /> Evaluating Risk with Gemini AI...
-                </>
+                <span className="flex items-center justify-center gap-2">
+                  <Sparkles className="animate-spin" size={18} /> Evaluating Hybrid NEWS2 + AI Triage...
+                </span>
               ) : (
-                <>
-                  <Sparkles size={18} /> Execute AI Triage Analysis
-                </>
+                <span className="flex items-center justify-center gap-2">
+                  <Stethoscope size={18} /> Execute AI Triage & Capacity Routing
+                </span>
               )}
             </button>
           </form>
         </div>
 
-        {/* Right Output Results Column */}
+        {/* Right: Assessment HUD Result */}
         <div>
           {assessmentResult ? (
-            <div className="glass-card" style={{
-              padding: '28px',
-              borderLeft: assessmentResult.risk_level === 'CRITICAL' ? '4px solid #e11d48' :
-                          assessmentResult.risk_level === 'HIGH' ? '4px solid #f43f5e' :
-                          assessmentResult.risk_level === 'MEDIUM' ? '4px solid #f59e0b' : '4px solid #10b981'
-            }}>
+            <div className="glass-card" style={{ padding: '28px' }}>
               <div className="flex items-center justify-between" style={{ marginBottom: '20px' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                  Clinical Risk Evaluation Result
-                </span>
-                <span className={`badge ${getRiskBadgeClass(assessmentResult.risk_level)}`} style={{ fontSize: '0.9rem', padding: '6px 14px' }}>
-                  {assessmentResult.risk_level || 'EVALUATED'}
+                <h2 style={{ fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Sparkles color="#2563EB" size={20} /> Triage Evaluation Results
+                </h2>
+                <span className={`badge ${getRiskBadgeClass(assessmentResult.risk_level || assessmentResult.urgency)}`}>
+                  {assessmentResult.risk_level || assessmentResult.urgency || 'EVALUATED'}
                 </span>
               </div>
 
-              {/* Triage Score Gauge Box */}
-              <div className="grid grid-cols-2" style={{ gap: '16px', marginBottom: '20px' }}>
-                <div style={{ background: '#F8FAFC', border: '1px solid var(--border-color)', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
-                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block' }}>NEWS2 Risk Score</span>
-                  <span style={{ fontSize: '2rem', fontWeight: '800', color: '#2563EB' }}>
-                    {assessmentResult.news_score ?? assessmentResult.score ?? 8}
+              {/* Triage Scores HUD */}
+              <div className="grid grid-cols-2" style={{ gap: '14px', marginBottom: '20px' }}>
+                <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
+                  <span style={{ fontSize: '0.8rem', color: '#1D4ED8', fontWeight: '600', textTransform: 'uppercase' }}>
+                    NEWS2 Clinical Score
                   </span>
+                  <span style={{ fontSize: '2.4rem', fontWeight: '800', color: '#1E40AF', display: 'block', marginTop: '4px' }}>
+                    {assessmentResult.news2_score ?? assessmentResult.risk_score ?? '4'}
+                  </span>
+                  <span style={{ fontSize: '0.75rem', color: '#3B82F6' }}>Physiological Urgency Metric</span>
                 </div>
-                <div style={{ background: '#F8FAFC', border: '1px solid var(--border-color)', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
-                  <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'block' }}>Clinical Urgency</span>
-                  <span style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-main)', marginTop: '6px', display: 'block' }}>
-                    {assessmentResult.urgency_level || 'EMERGENCY'}
+
+                <div style={{ background: '#F5F3FF', border: '1px solid #DDD6FE', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
+                  <span style={{ fontSize: '0.8rem', color: '#6D28D9', fontWeight: '600', textTransform: 'uppercase' }}>
+                    AI Urgency Tier
                   </span>
+                  <span style={{ fontSize: '1.5rem', fontWeight: '800', color: '#5B21B6', display: 'block', marginTop: '10px' }}>
+                    {assessmentResult.urgency || assessmentResult.risk_level || 'ROUTINE'}
+                  </span>
+                  <span style={{ fontSize: '0.75rem', color: '#7C3AED' }}>Gemini Reasoning Engine</span>
                 </div>
               </div>
 
-              {/* Summary Reasoning */}
-              <div style={{ marginBottom: '20px' }}>
-                <h3 style={{ fontSize: '1rem', color: 'var(--text-main)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <FileText size={18} color="#2563EB" /> Gemini AI Clinical Reasoning
+              {/* Clinical AI Reasoning */}
+              <div style={{ background: '#F8FAFC', border: '1px solid var(--border-color)', padding: '16px', borderRadius: '12px', marginBottom: '20px' }}>
+                <h3 style={{ fontSize: '0.95rem', color: '#2563EB', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <FileText size={16} /> Clinical AI Assessment Summary
                 </h3>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: '1.5', background: '#F8FAFC', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                  {assessmentResult.reasoning || assessmentResult.summary || 'Patient exhibits clinical markers consistent with acute presentation requiring priority monitoring.'}
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.5' }}>
+                  {assessmentResult.clinical_reasoning || assessmentResult.reasoning || 'Patient displays stable physiological parameters with normal vital sign telemetry.'}
                 </p>
               </div>
 
-              {/* Action Plan */}
-              {assessmentResult.recommended_actions && (
-                <div style={{ marginBottom: '24px' }}>
-                  <h4 style={{ fontSize: '0.9rem', color: '#2563EB', marginBottom: '8px' }}>Recommended Immediate Protocols:</h4>
-                  <ul style={{ paddingLeft: '20px', color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: '1.6' }}>
-                    {Array.isArray(assessmentResult.recommended_actions) ? (
-                      assessmentResult.recommended_actions.map((act, i) => <li key={i}>{act}</li>)
-                    ) : (
-                      <li>{assessmentResult.recommended_actions}</li>
-                    )}
-                  </ul>
-                </div>
-              )}
-
-              {/* Recommended Top Facilities */}
+              {/* Recommended Top Facilities with GPS Navigation */}
               {recommendationsResult?.recommended_facilities && (
                 <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '20px', marginTop: '20px' }}>
                   <h3 style={{ fontSize: '1.05rem', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Building2 color="#10b981" size={20} /> Matched Grid Facilities
+                    <Building2 color="#10b981" size={20} /> Matched Emergency Hospitals via GPS
                   </h3>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {recommendationsResult.recommended_facilities.slice(0, 3).map((match, idx) => (
-                      <div key={idx} style={{
-                        padding: '14px 16px',
-                        background: '#F8FAFC',
-                        borderRadius: '10px',
-                        border: '1px solid var(--border-color)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between'
-                      }}>
-                        <div>
-                          <span style={{ fontWeight: '700', fontSize: '0.95rem', display: 'block' }}>
-                            {match.facility_name || match.name || `Facility #${match.facility_id}`}
-                          </span>
-                          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                            Available ICU Beds: <strong style={{ color: '#10b981' }}>{match.available_icu_beds ?? 'Yes'}</strong> | Distance: <strong>{match.distance_km ?? match.distance ?? '5.2'} km</strong>
-                          </span>
+                    {recommendationsResult.recommended_facilities.slice(0, 3).map((match, idx) => {
+                      const facLat = match.location_lat || match.facility_lat || INDORE_DEFAULT_LAT;
+                      const facLng = match.location_lng || match.facility_lng || INDORE_DEFAULT_LNG;
+                      const navUrl = getGoogleMapsNavUrl(latitude, longitude, facLat, facLng);
+
+                      return (
+                        <div key={idx} style={{
+                          padding: '14px 16px',
+                          background: '#F8FAFC',
+                          borderRadius: '10px',
+                          border: '1px solid var(--border-color)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '12px'
+                        }}>
+                          <div style={{ flex: 1 }}>
+                            <span style={{ fontWeight: '700', fontSize: '0.95rem', display: 'block' }}>
+                              {match.facility_name || match.name || `Facility #${match.facility_id}`}
+                            </span>
+                            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                              Available ICU Beds: <strong style={{ color: '#10b981' }}>{match.available_icu_beds ?? 'Yes'}</strong> | Distance: <strong>{match.distance_km ?? match.distance ?? '2.4'} km</strong>
+                            </span>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span className="badge badge-info">
+                              {Math.round((match.score || 0.92) * 100)}% Match
+                            </span>
+                            <a
+                              href={navUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="btn btn-outline btn-sm flex items-center gap-1"
+                              style={{ textDecoration: 'none', padding: '5px 9px', fontSize: '0.75rem' }}
+                              title="Turn-by-Turn GPS Directions"
+                            >
+                              <Navigation size={12} color="#2563EB" /> Route
+                            </a>
+                          </div>
                         </div>
-                        <span className="badge badge-info" style={{ marginLeft: 'auto' }}>
-                          Match Score: {Math.round((match.score || 0.92) * 100)}%
-                        </span>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -439,7 +574,7 @@ export const TriageRiskAssessment = () => {
                   className="btn btn-success"
                   style={{ flex: 1 }}
                 >
-                  <Building2 size={18} /> View All Matched Facilities
+                  <Building2 size={18} /> View All Facilities on Grid
                 </button>
                 <button
                   onClick={() => navigate('/referrals')}
@@ -474,7 +609,7 @@ export const TriageRiskAssessment = () => {
               </div>
               <h3 style={{ fontSize: '1.2rem', marginBottom: '8px' }}>Ready for Triage Evaluation</h3>
               <p style={{ color: 'var(--text-muted)', maxWidth: '340px', fontSize: '0.9rem', lineHeight: '1.5' }}>
-                Fill in patient vital parameters and clinical complaints on the left, then click <strong>Execute AI Triage Analysis</strong> to view risk scoring.
+                Fill in patient vital parameters, geotag the location with <strong>Acquire Patient GPS</strong>, and click <strong>Execute AI Triage</strong> to calculate risk and route to the nearest ICU.
               </p>
             </div>
           )}

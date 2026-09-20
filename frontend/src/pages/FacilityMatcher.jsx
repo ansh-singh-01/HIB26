@@ -17,8 +17,21 @@ import {
   Plus,
   Navigation,
   ExternalLink,
-  ShieldCheck
+  ShieldCheck,
+  Locate,
+  Compass,
+  Radio,
+  Clock
 } from 'lucide-react';
+import {
+  getCurrentGPSCoordinates,
+  haversineDistanceKm,
+  getDrivingETA,
+  getGoogleMapsNavUrl,
+  INDORE_LANDMARK_PRESETS,
+  INDORE_DEFAULT_LAT,
+  INDORE_DEFAULT_LNG
+} from '../utils/geo';
 
 export const FacilityMatcher = () => {
   const navigate = useNavigate();
@@ -32,12 +45,24 @@ export const FacilityMatcher = () => {
   const [selectedSpecialty, setSelectedSpecialty] = useState('ALL');
   const [showCreateModal, setShowCreateModal] = useState(false);
 
+  // GPS User Location State
+  const [userLocation, setUserLocation] = useState({
+    lat: INDORE_DEFAULT_LAT,
+    lng: INDORE_DEFAULT_LNG,
+    name: 'Indore Central (Rajwada)',
+    isLiveGPS: false,
+    accuracy: null,
+  });
+  const [gpsDetecting, setGpsDetecting] = useState(false);
+  const [gpsStatusMessage, setGpsStatusMessage] = useState('');
+  const [sortByDistance, setSortByDistance] = useState(true);
+
   // New facility form
   const [newFacility, setNewFacility] = useState({
     name: '',
     type: 'PRIMARY',
-    location_lat: 22.7196,
-    location_lng: 75.8577,
+    location_lat: INDORE_DEFAULT_LAT,
+    location_lng: INDORE_DEFAULT_LNG,
     address: '',
     phone: '',
     total_general_beds: 50,
@@ -65,6 +90,55 @@ export const FacilityMatcher = () => {
     }
   };
 
+  // Live GPS Geolocation Trigger
+  const handleDetectLiveGPS = async () => {
+    setGpsDetecting(true);
+    setGpsStatusMessage('Acquiring high-accuracy GPS coordinates...');
+    try {
+      const coords = await getCurrentGPSCoordinates();
+      setUserLocation({
+        lat: coords.latitude,
+        lng: coords.longitude,
+        name: 'My Device Live GPS',
+        isLiveGPS: true,
+        accuracy: coords.accuracy,
+      });
+      setGpsStatusMessage(`GPS Locked! Accuracy ±${coords.accuracy}m`);
+      setTimeout(() => setGpsStatusMessage(''), 5000);
+    } catch (err) {
+      console.warn('GPS Error:', err.message);
+      setGpsStatusMessage(err.message);
+      setTimeout(() => setGpsStatusMessage(''), 6000);
+    } finally {
+      setGpsDetecting(false);
+    }
+  };
+
+  const handleSelectPreset = (preset) => {
+    setUserLocation({
+      lat: preset.lat,
+      lng: preset.lng,
+      name: `${preset.name} (${preset.area})`,
+      isLiveGPS: false,
+      accuracy: null,
+    });
+    setGpsStatusMessage(`Location updated to ${preset.name}`);
+    setTimeout(() => setGpsStatusMessage(''), 3000);
+  };
+
+  const handleAcquireFacilityGPS = async () => {
+    try {
+      const coords = await getCurrentGPSCoordinates();
+      setNewFacility(prev => ({
+        ...prev,
+        location_lat: coords.latitude,
+        location_lng: coords.longitude
+      }));
+    } catch (err) {
+      alert('Could not acquire device GPS: ' + err.message);
+    }
+  };
+
   const handleCreateFacility = async (e) => {
     e.preventDefault();
     try {
@@ -77,25 +151,49 @@ export const FacilityMatcher = () => {
     }
   };
 
-  const filteredFacilities = facilities.filter(f => {
-    const q = searchQuery.toLowerCase().trim();
-    const matchesSearch = !q || 
-                          f.name?.toLowerCase().includes(q) ||
-                          f.address?.toLowerCase().includes(q) ||
-                          (f.specialties && f.specialties.some(s => s.toLowerCase().includes(q)));
+  // Process facilities with distance calculations & sorting
+  const processedFacilities = facilities
+    .map(f => {
+      const distanceKm = haversineDistanceKm(
+        userLocation.lat,
+        userLocation.lng,
+        f.location_lat,
+        f.location_lng
+      );
+      const drivingETA = getDrivingETA(distanceKm);
+      return {
+        ...f,
+        distanceKm,
+        drivingETA
+      };
+    })
+    .filter(f => {
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch = !q || 
+                            f.name?.toLowerCase().includes(q) ||
+                            f.address?.toLowerCase().includes(q) ||
+                            (f.specialties && f.specialties.some(s => s.toLowerCase().includes(q)));
 
-    const fType = (f.type || '').toUpperCase();
-    const matchesTier = selectedTier === 'ALL' || 
-                        fType === selectedTier ||
-                        (selectedTier === 'PRIMARY' && (fType === 'PRIMARY' || fType === 'PHC')) ||
-                        (selectedTier === 'SECONDARY' && (fType === 'SECONDARY' || fType === 'CHC')) ||
-                        (selectedTier === 'TERTIARY' && (fType === 'TERTIARY' || fType === 'HOSPITAL'));
+      const fType = (f.type || '').toUpperCase();
+      const matchesTier = selectedTier === 'ALL' || 
+                          fType === selectedTier ||
+                          (selectedTier === 'PRIMARY' && (fType === 'PRIMARY' || fType === 'PHC')) ||
+                          (selectedTier === 'SECONDARY' && (fType === 'SECONDARY' || fType === 'CHC')) ||
+                          (selectedTier === 'TERTIARY' && (fType === 'TERTIARY' || fType === 'HOSPITAL'));
 
-    const matchesSpecialty = selectedSpecialty === 'ALL' || 
-                             (f.specialties && f.specialties.some(s => s.toLowerCase().includes(selectedSpecialty.toLowerCase())));
+      const matchesSpecialty = selectedSpecialty === 'ALL' || 
+                               (f.specialties && f.specialties.some(s => s.toLowerCase().includes(selectedSpecialty.toLowerCase())));
 
-    return matchesSearch && matchesTier && matchesSpecialty;
-  });
+      return matchesSearch && matchesTier && matchesSpecialty;
+    });
+
+  if (sortByDistance) {
+    processedFacilities.sort((a, b) => {
+      if (a.distanceKm == null) return 1;
+      if (b.distanceKm == null) return -1;
+      return a.distanceKm - b.distanceKm;
+    });
+  }
 
   const getLoadBadge = (availICU, totalICU) => {
     if (!totalICU) return <span className="badge badge-low">Normal Load</span>;
@@ -107,19 +205,121 @@ export const FacilityMatcher = () => {
 
   return (
     <div className="container">
-      <div className="flex items-center justify-between" style={{ marginBottom: '24px' }}>
+      <div className="flex items-center justify-between" style={{ marginBottom: '20px' }}>
         <div>
           <h1 style={{ fontSize: '1.8rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Building2 color="#059669" /> Healthcare Facilities & Hospital Network
           </h1>
           <p style={{ color: 'var(--text-muted)' }}>
-            Showing {filteredFacilities.length} of {facilities.length} verified Primary Health Centres, CHCs, and Hospitals from India Ministry of Health & Kaggle dataset.
+            Real-time multi-tier hospital capacity grid with live GPS routing and proximity matching.
           </p>
         </div>
+
         {!isPatient && (
           <button onClick={() => setShowCreateModal(true)} className="btn btn-primary">
             <Plus size={18} /> Register New Facility
           </button>
+        )}
+      </div>
+
+      {/* Live GPS Proximity Bar */}
+      <div className="glass-card" style={{
+        padding: '16px 20px',
+        marginBottom: '20px',
+        background: userLocation.isLiveGPS ? 'linear-gradient(135deg, #ECFDF5 0%, #FFFFFF 100%)' : '#FFFFFF',
+        border: userLocation.isLiveGPS ? '1px solid #6EE7B7' : '1px solid var(--border-color)',
+      }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '10px',
+              background: userLocation.isLiveGPS ? '#D1FAE5' : '#EFF6FF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: userLocation.isLiveGPS ? '#059669' : '#2563EB'
+            }}>
+              <Compass size={22} className={gpsDetecting ? 'animate-spin' : ''} />
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <strong style={{ fontSize: '0.95rem', color: 'var(--text-main)' }}>
+                  Current GPS Origin: {userLocation.name}
+                </strong>
+                {userLocation.isLiveGPS ? (
+                  <span className="badge badge-low flex items-center gap-1" style={{ fontSize: '0.72rem' }}>
+                    <Radio size={12} className="animate-pulse" /> Live Device GPS
+                  </span>
+                ) : (
+                  <span className="badge badge-info" style={{ fontSize: '0.72rem' }}>Indore City Grid</span>
+                )}
+                {userLocation.accuracy && (
+                  <span style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 600 }}>
+                    (±{userLocation.accuracy}m accuracy)
+                  </span>
+                )}
+              </div>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                Coordinates: {userLocation.lat.toFixed(4)}°N, {userLocation.lng.toFixed(4)}°E • Driving ETAs & distances dynamically calculated
+              </span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={handleDetectLiveGPS}
+              disabled={gpsDetecting}
+              className="btn btn-primary btn-sm flex items-center gap-1"
+              style={{ padding: '8px 14px' }}
+            >
+              <Locate size={15} className={gpsDetecting ? 'animate-spin' : ''} />
+              {gpsDetecting ? 'Acquiring GPS...' : 'Use My Live GPS'}
+            </button>
+
+            {/* Quick Landmark Preset Dropdown */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Presets:</span>
+              <select
+                className="form-select"
+                style={{ padding: '6px 10px', fontSize: '0.8rem', minWidth: '180px' }}
+                value={INDORE_LANDMARK_PRESETS.some(p => p.name.includes(userLocation.name)) ? userLocation.name : ''}
+                onChange={(e) => {
+                  const preset = INDORE_LANDMARK_PRESETS.find(p => p.name === e.target.value);
+                  if (preset) handleSelectPreset(preset);
+                }}
+              >
+                <option value="" disabled>Select Indore Landmark</option>
+                {INDORE_LANDMARK_PRESETS.map((p, idx) => (
+                  <option key={idx} value={p.name}>
+                    {p.name} ({p.area})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setSortByDistance(!sortByDistance)}
+              className={sortByDistance ? "btn btn-secondary btn-sm" : "btn btn-outline btn-sm"}
+              style={{ fontSize: '0.8rem' }}
+            >
+              {sortByDistance ? '✓ Sorted by Distance' : 'Sort by Distance'}
+            </button>
+          </div>
+        </div>
+
+        {gpsStatusMessage && (
+          <div style={{
+            marginTop: '10px',
+            fontSize: '0.82rem',
+            color: gpsStatusMessage.includes('Locked') || gpsStatusMessage.includes('updated') ? '#059669' : '#DC2626',
+            fontWeight: 600
+          }}>
+            {gpsStatusMessage}
+          </div>
         )}
       </div>
 
@@ -133,7 +333,7 @@ export const FacilityMatcher = () => {
                 type="text"
                 className="form-input"
                 style={{ paddingLeft: '40px' }}
-                placeholder="e.g. PHC, CHC, Indore, Madhya Pradesh..."
+                placeholder="e.g. PHC, CHC, Indore, MYH, Apollo..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -172,21 +372,28 @@ export const FacilityMatcher = () => {
         <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-muted)' }}>
           Loading Smart Health Grid Facilities...
         </div>
-      ) : filteredFacilities.length === 0 ? (
+      ) : processedFacilities.length === 0 ? (
         <div className="glass-card" style={{ padding: '48px', textAlign: 'center' }}>
           <Building2 size={48} color="var(--text-muted)" style={{ marginBottom: '14px' }} />
           <h3>No Facilities Found</h3>
           <p style={{ color: 'var(--text-muted)' }}>Try adjusting your search query or filter selection.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-3">
-          {filteredFacilities.map((f) => {
+        <div className="grid grid-cols-3" style={{ gap: '20px' }}>
+          {processedFacilities.map((f) => {
             const fTypeStr = (f.type || '').toUpperCase();
             const badgeClass = (fTypeStr === 'TERTIARY' || fTypeStr === 'HOSPITAL') 
               ? 'badge-purple' 
               : (fTypeStr === 'SECONDARY' || fTypeStr === 'CHC') 
                 ? 'badge-info' 
                 : 'badge-low';
+
+            const mapsNavUrl = getGoogleMapsNavUrl(
+              userLocation.lat,
+              userLocation.lng,
+              f.location_lat,
+              f.location_lng
+            );
 
             return (
               <div key={f.id} className="glass-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -200,12 +407,37 @@ export const FacilityMatcher = () => {
 
                   <h3 style={{ fontSize: '1.15rem', marginBottom: '8px', lineHeight: '1.3' }}>{f.name}</h3>
 
-                  <div className="flex items-center gap-1" style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginBottom: '14px' }}>
+                  <div className="flex items-center gap-1" style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginBottom: '10px' }}>
                     <MapPin size={14} color="#2563EB" style={{ flexShrink: 0 }} />
                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {f.address || 'Smart Health Grid Hub'}
                     </span>
                   </div>
+
+                  {/* Dynamic GPS Distance & Transit ETA Badge */}
+                  {f.distanceKm != null && (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      background: '#EFF6FF',
+                      border: '1px solid #BFDBFE',
+                      padding: '7px 12px',
+                      borderRadius: '8px',
+                      marginBottom: '14px',
+                      fontSize: '0.82rem'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#1D4ED8', fontWeight: 700 }}>
+                        <MapPin size={13} />
+                        <span>{f.distanceKm} km</span>
+                      </div>
+                      <span style={{ color: '#93C5FD' }}>•</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#475569' }}>
+                        <Clock size={13} />
+                        <span>~{f.drivingETA} mins driving ETA</span>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Capacity Stats Pills */}
                   <div style={{ background: '#F8FAFC', border: '1px solid var(--border-color)', padding: '12px', borderRadius: '10px', marginBottom: '16px' }}>
@@ -219,14 +451,14 @@ export const FacilityMatcher = () => {
 
                       <div>
                         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>ICU Beds</span>
-                        <strong style={{ fontSize: '1.05rem', color: '#059669' }}>
+                        <strong style={{ fontSize: '1.05rem', color: f.available_icu_beds > 0 ? '#059669' : '#DC2626' }}>
                           {f.available_icu_beds ?? 0}/{f.total_icu_beds ?? 0}
                         </strong>
                       </div>
 
                       <div>
                         <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Ventilators</span>
-                        <strong style={{ fontSize: '1.05rem', color: '#2563EB' }}>
+                        <strong style={{ fontSize: '1.05rem', color: 'var(--text-main)' }}>
                           {f.ventilator_count ?? 0}
                         </strong>
                       </div>
@@ -253,13 +485,13 @@ export const FacilityMatcher = () => {
                 {isPatient ? (
                   <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                     <a
-                      href={`https://www.google.com/maps/dir/?api=1&destination=${f.location_lat},${f.location_lng}`}
+                      href={mapsNavUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="apollo-dash-btn-primary"
                       style={{ flex: 1, padding: '7px 10px', fontSize: '0.78rem', justifyContent: 'center', textDecoration: 'none' }}
                     >
-                      <Navigation size={13} /> GPS Route
+                      <Navigation size={13} /> GPS Live Route
                     </a>
                     <button
                       onClick={() => navigate('/checkin', { state: { targetFacility: f.name } })}
@@ -270,13 +502,25 @@ export const FacilityMatcher = () => {
                     </button>
                   </div>
                 ) : (
-                  <button
-                    onClick={() => navigate('/referrals', { state: { targetFacilityId: f.id, targetFacilityName: f.name } })}
-                    className="btn btn-secondary btn-sm"
-                    style={{ width: '100%', marginTop: '12px' }}
-                  >
-                    <ArrowRightLeft size={15} /> Route Patient Referral Here
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                    <button
+                      onClick={() => navigate('/referrals', { state: { targetFacilityId: f.id, targetFacilityName: f.name } })}
+                      className="btn btn-secondary btn-sm"
+                      style={{ flex: 1 }}
+                    >
+                      <ArrowRightLeft size={15} /> Route Referral
+                    </button>
+                    <a
+                      href={mapsNavUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-outline btn-sm"
+                      style={{ padding: '6px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}
+                      title="Open GPS Directions in Google Maps"
+                    >
+                      <Navigation size={14} color="#2563EB" />
+                    </a>
+                  </div>
                 )}
               </div>
             );
@@ -288,7 +532,7 @@ export const FacilityMatcher = () => {
       {showCreateModal && (
         <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ fontSize: '1.4rem', marginBottom: '20px', display: 'flex', items: 'center', gap: '8px' }}>
+            <h2 style={{ fontSize: '1.4rem', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Building2 color="#06b6d4" /> Register New Healthcare Facility
             </h2>
 
@@ -342,6 +586,44 @@ export const FacilityMatcher = () => {
                 />
               </div>
 
+              {/* GPS Coordinates Section */}
+              <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '14px', borderRadius: '10px', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <label className="form-label" style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Compass size={15} color="#2563EB" /> GPS Coordinates
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleAcquireFacilityGPS}
+                    className="btn btn-secondary btn-sm"
+                    style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+                  >
+                    <Locate size={12} /> Acquire Current GPS
+                  </button>
+                </div>
+                <div className="grid grid-cols-2" style={{ gap: '12px' }}>
+                  <div>
+                    <span style={{ fontSize: '0.72rem', color: '#64748B', display: 'block', marginBottom: '4px' }}>Latitude</span>
+                    <input
+                      type="number"
+                      step="0.0001"
+                      className="form-input"
+                      value={newFacility.location_lat}
+                      onChange={(e) => setNewFacility({ ...newFacility, location_lat: parseFloat(e.target.value) || INDORE_DEFAULT_LAT })}
+                    />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: '0.72rem', color: '#64748B', display: 'block', marginBottom: '4px' }}>Longitude</span>
+                    <input
+                      type="number"
+                      step="0.0001"
+                      className="form-input"
+                      value={newFacility.location_lng}
+                      onChange={(e) => setNewFacility({ ...newFacility, location_lng: parseFloat(e.target.value) || INDORE_DEFAULT_LNG })}
+                    />
+                  </div>
+                </div>
+              </div>
 
               <div className="grid grid-cols-3" style={{ gap: '14px' }}>
                 <div className="form-group">
