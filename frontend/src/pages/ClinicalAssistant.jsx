@@ -17,7 +17,11 @@ import {
   Copy,
   Check,
   ShieldCheck,
-  HelpCircle
+  HelpCircle,
+  Mic,
+  MicOff,
+  Globe2,
+  Languages
 } from 'lucide-react';
 import {
   syncOfflineKnowledgePack,
@@ -32,6 +36,12 @@ export const ClinicalAssistant = () => {
   const [loading, setLoading] = useState(false);
   const [isOfflineMode, setIsOfflineMode] = useState(!navigator.onLine);
   const [copiedIndex, setCopiedIndex] = useState(null);
+
+  // Voice input state
+  const [isListening, setIsListening] = useState(false);
+  const [voiceLang, setVoiceLang] = useState('en-IN'); // 'en-IN' | 'hi-IN'
+  const [voiceTranscript, setVoiceTranscript] = useState('');
+  const recognitionRef = useRef(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -168,6 +178,69 @@ export const ClinicalAssistant = () => {
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 2000);
   };
+
+  // ─── Bhashini-inspired multilingual voice input ───────────────────────────
+  const isSpeechSupported =
+    typeof window !== 'undefined' &&
+    ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
+
+  const startVoiceInput = () => {
+    if (!isSpeechSupported) {
+      alert('Voice input is not supported in your browser. Please use Chrome or Edge.');
+      return;
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = voiceLang;          // 'hi-IN' or 'en-IN'
+    recognition.interimResults = true;      // show live partial results
+    recognition.maxAlternatives = 1;
+    recognition.continuous = false;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      setVoiceTranscript('');
+    };
+
+    recognition.onresult = (event) => {
+      let interim = '';
+      let final = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) final += t;
+        else interim += t;
+      }
+      setVoiceTranscript(interim || final);
+      if (final) setInputQuery(prev => (prev + ' ' + final).trim());
+    };
+
+    recognition.onerror = (e) => {
+      console.error('Speech recognition error:', e.error);
+      setIsListening(false);
+      setVoiceTranscript('');
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+      setVoiceTranscript('');
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
+  const stopVoiceInput = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    setIsListening(false);
+    setVoiceTranscript('');
+  };
+
+  const toggleVoiceLang = () => {
+    if (isListening) stopVoiceInput();
+    setVoiceLang(prev => prev === 'en-IN' ? 'hi-IN' : 'en-IN');
+  };
+  // ─────────────────────────────────────────────────────────────────────────
 
   const quickStarters = [
     { label: 'Chest Pressure & Sweating', query: 'I have severe chest pressure radiating to my left arm with cold sweat' },
@@ -715,19 +788,109 @@ export const ClinicalAssistant = () => {
             background: '#FFFFFF',
             borderTop: '1px solid #E5E7EB'
           }}>
+
+            {/* Live voice transcript preview */}
+            {isListening && voiceTranscript && (
+              <div style={{
+                marginBottom: '8px',
+                padding: '8px 14px',
+                background: 'linear-gradient(90deg, #ECFDF5 0%, #F0FDF4 100%)',
+                borderRadius: '12px',
+                border: '1px dashed #34D399',
+                fontSize: '0.85rem',
+                color: '#065F46',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <span style={{
+                  width: '8px', height: '8px',
+                  borderRadius: '50%',
+                  background: '#10B981',
+                  animation: 'pulse 1s infinite',
+                  flexShrink: 0
+                }} />
+                <em>{voiceTranscript}</em>
+              </div>
+            )}
+
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 handleSendMessage();
               }}
-              style={{ display: 'flex', gap: '10px', alignItems: 'center' }}
+              style={{ display: 'flex', gap: '8px', alignItems: 'center' }}
             >
+              {/* Language toggle — Bhashini-style */}
+              <button
+                type="button"
+                onClick={toggleVoiceLang}
+                title={`Switch to ${voiceLang === 'en-IN' ? 'Hindi' : 'English'}`}
+                style={{
+                  flexShrink: 0,
+                  background: voiceLang === 'hi-IN'
+                    ? 'linear-gradient(135deg, #FF6B35 0%, #E55A2B 100%)'
+                    : 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '20px',
+                  padding: '9px 13px',
+                  fontWeight: '700',
+                  fontSize: '0.78rem',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  boxShadow: voiceLang === 'hi-IN'
+                    ? '0 2px 8px rgba(229, 90, 43, 0.35)'
+                    : '0 2px 8px rgba(37, 99, 235, 0.3)',
+                  transition: 'all 0.25s ease',
+                  letterSpacing: '0.3px'
+                }}
+              >
+                <Languages size={13} />
+                {voiceLang === 'hi-IN' ? 'हि' : 'EN'}
+              </button>
+
+              {/* Mic button */}
+              <button
+                type="button"
+                onClick={isListening ? stopVoiceInput : startVoiceInput}
+                title={isListening ? 'Stop recording' : `Speak in ${voiceLang === 'hi-IN' ? 'Hindi' : 'English'}`}
+                style={{
+                  flexShrink: 0,
+                  background: isListening
+                    ? 'linear-gradient(135deg, #EF4444 0%, #B91C1C 100%)'
+                    : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '42px',
+                  height: '42px',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: isListening
+                    ? '0 0 0 4px rgba(239, 68, 68, 0.25), 0 2px 8px rgba(185, 28, 28, 0.4)'
+                    : '0 2px 8px rgba(5, 150, 105, 0.35)',
+                  animation: isListening ? 'pulse 1.2s infinite' : 'none',
+                  transition: 'background 0.2s ease, box-shadow 0.2s ease'
+                }}
+              >
+                {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+              </button>
+
               <input
                 ref={inputRef}
                 type="text"
                 value={inputQuery}
                 onChange={(e) => setInputQuery(e.target.value)}
-                placeholder="Describe your disease or symptoms (e.g. 'fever with chills', 'crushing chest pain', 'asthma attack')..."
+                placeholder={
+                  voiceLang === 'hi-IN'
+                    ? 'अपनी बीमारी या लक्षण बताएं (जैसे बुखार, सीने में दर्द)…'
+                    : "Describe your symptoms (e.g. 'fever with chills', 'chest pain')…"
+                }
                 style={{
                   flex: 1,
                   padding: '12px 18px',
@@ -765,9 +928,13 @@ export const ClinicalAssistant = () => {
               </button>
             </form>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px', fontSize: '0.74rem', color: '#9CA3AF' }}>
-              <span>🚨 For life-threatening emergencies, dial <strong>108 / 112</strong> immediately.</span>
-              <span>🔒 100% Private • Local SQLite Storage</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px', fontSize: '0.74rem', color: '#9CA3AF', flexWrap: 'wrap', gap: '4px' }}>
+              <span>🚨 For emergencies, dial <strong>108 / 112</strong> immediately.</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>🎙️ Bhashini-style multilingual voice</span>
+                <span>•</span>
+                <span>🔒 100% Private • SQLite</span>
+              </span>
             </div>
           </div>
         </div>
