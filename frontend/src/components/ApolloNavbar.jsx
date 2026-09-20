@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, ArrowRight, ChevronDown } from 'lucide-react';
+import { Activity, ArrowRight, ChevronDown, PhoneCall } from 'lucide-react';
 
 export const ApolloNavbar = ({ currentPage = 'landing' }) => {
   return (
@@ -67,6 +67,21 @@ export const ApolloNavbar = ({ currentPage = 'landing' }) => {
               </Link>
             </>
           )}
+
+          <a
+            href="tel:108"
+            id="apollo-sos-call-btn"
+            className="apollo-btn-sos"
+            aria-label="Direct Emergency Ambulance Call 108"
+            title="Emergency Ambulance: Directly open dial pad with 108"
+            onClick={() => {
+              window.location.href = 'tel:108';
+            }}
+          >
+            <span className="apollo-sos-pulse-ring" aria-hidden="true"></span>
+            <PhoneCall size={15} className="apollo-sos-icon" />
+            <span className="apollo-sos-text">SOS 108</span>
+          </a>
         </div>
       </header>
     </div>
