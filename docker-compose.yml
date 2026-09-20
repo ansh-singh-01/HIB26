@@ -1,0 +1,58 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: shg_user
+      POSTGRES_PASSWORD: shg_pass
+      POSTGRES_DB: smart_health_grid
+    ports:
+      - "5433:5432"
+    volumes:
+      - shg_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shg_user -d smart_health_grid"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: shg_root_pass
+      MYSQL_DATABASE: smart_health_grid
+      MYSQL_USER: shg_user
+      MYSQL_PASSWORD: shg_pass
+    ports:
+      - "3307:3306"
+    volumes:
+      - shg_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "shg_user", "-pshg_pass"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://shg_user:shg_pass@db:5432/smart_health_grid
+      DATABASE_URL_SYNC: postgresql+psycopg2://shg_user:shg_pass@db:5432/smart_health_grid
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-change-me-in-prod}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: "60"
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      ENVIRONMENT: development
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app # dev convenience: live-reload source without rebuilding; remove for prod images
+
+volumes:
+  shg_postgres_data:
+  shg_mysql_data:

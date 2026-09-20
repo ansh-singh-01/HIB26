@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.db
+.env
+*.log
+.idea/
+node_modules/
+frontend/dist/
+.venv/
+venv/
+data/
+*.parquet

@@ -1,0 +1,522 @@
+/* ==========================================================================
+   Kindsight Design System — MediConnect
+   Sunlit field journal at dusk: cream paper, soft linen, olive ink,
+   a deep olive hero panel, terracotta CTAs, and a flash of chartreuse.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* Kindsight Core Color Tokens */
+  --color-cream-paper: #faf5f1;
+  --color-soft-linen: #fefffa;
+  --color-ink-black: #0e0f0a;
+  --color-midnight-black: #0a0a0a;
+  --color-pure-white: #ffffff;
+  --color-warm-sand: #e5e1d6;
+  --color-olive-grove: #3d4128;
+  --color-chartreuse-spark: #e1f079;
+  --color-terracotta-cta: #de7653;
+  --color-terracotta-hover: #cb6543;
+  --color-coral-outline: #e7573d;
+  --color-deep-olive: #24280f;
+
+  /* Mapped Standard Application Tokens */
+  --bg-dark: var(--color-cream-paper);
+  --bg-sand: var(--color-cream-paper);
+  --bg-sand-light: var(--color-soft-linen);
+  --bg-card: var(--color-soft-linen);
+  --bg-card-hover: #f9fbf3;
+  --bg-glass: var(--color-soft-linen);
+  --bg-input: var(--color-soft-linen);
+  --bg-subtle: var(--color-warm-sand);
+
+  /* Borders & Hairlines */
+  --border-color: rgba(14, 15, 10, 0.12);
+  --border-subtle: rgba(14, 15, 10, 0.07);
+  --border-glow: rgba(225, 240, 121, 0.4);
+
+  /* Primary Brand Accents */
+  --primary: var(--color-terracotta-cta);
+  --primary-hover: var(--color-terracotta-hover);
+  --primary-glow: rgba(222, 118, 83, 0.2);
+
+  --accent-spark: var(--color-chartreuse-spark);
+  --accent-blue: #3d4128;
+  --accent-blue-hover: #24280f;
+  --accent-blue-subtle: #f0eedf;
+
+  --secondary: #5e6451;
+  --secondary-glow: rgba(94, 100, 81, 0.15);
+
+  --success: #355e3b;
+  --success-glow: rgba(53, 94, 59, 0.15);
+
+  --warning: #c26d24;
+  --warning-glow: rgba(194, 109, 36, 0.15);
+
+  --danger: var(--color-coral-outline);
+  --danger-glow: rgba(231, 87, 61, 0.2);
+
+  --critical: #ba2817;
+  --critical-glow: rgba(186, 40, 23, 0.2);
+
+  /* Text Colors */
+  --text-main: var(--color-ink-black);
+  --text-secondary: #35382e;
+  --text-muted: #666c5a;
+  --text-dim: #8b927e;
+
+  /* Typography Families */
+  --font-times-now: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-founders-grotesk: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: var(--font-times-now);
+  --font-body: var(--font-founders-grotesk);
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Typography Scale */
+  --text-fine-print: 10px;
+  --text-micro: 12px;
+  --text-caption: 14px;
+  --text-body-sm: 16px;
+  --text-body: 18px;
+  --text-subheading: 40px;
+  --text-heading-sm: 50px;
+  --text-heading: 60px;
+  --text-heading-lg: 80px;
+  --text-display: 120px;
+
+  /* Radii */
+  --radius-cards: 24px;
+  --radius-sm: 3px;
+  --radius-md: 10px;
+  --radius-lg: 18px;
+  --radius-full: 50px;
+  --radius-inputs: 10px;
+  --radius-buttons: 10px;
+  --radius-badges: 18px;
+
+  /* Tonal Elevation — Faintest subtle shadow only */
+  --shadow-sm: 0 1px 2px rgba(14, 15, 10, 0.04);
+  --shadow-md: 0 2px 4px rgba(14, 15, 10, 0.05);
+  --shadow-lg: 0 4px 12px rgba(14, 15, 10, 0.06);
+  --shadow-glow: 0 0 14px rgba(225, 240, 121, 0.35);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--color-cream-paper);
+  color: var(--color-ink-black);
+  font-family: var(--font-founders-grotesk);
+  font-size: 16px;
+  line-height: 1.4;
+  letter-spacing: -0.008em;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbar — Earthy Warm Sand */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-warm-sand);
+}
+::-webkit-scrollbar-thumb {
+  background: #c7c1b3;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a9a293;
+}
+
+/* Headings — Editorial Display Times Now / Playfair */
+h1, h2, h3 {
+  font-family: var(--font-times-now);
+  color: var(--color-ink-black);
+  font-weight: 300;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+}
+
+h4, h5, h6 {
+  font-family: var(--font-founders-grotesk);
+  color: var(--color-ink-black);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+/* Kindsight Signature Italic Emphasis with Chartreuse Underline */
+.kindsight-italic-spark {
+  font-style: italic;
+  font-weight: 300;
+  position: relative;
+  display: inline-block;
+  color: inherit;
+}
+.kindsight-italic-spark::after {
+  content: '';
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  bottom: 2px;
+  height: 6px;
+  background: var(--color-chartreuse-spark);
+  border-radius: 3px;
+  z-index: -1;
+  transform: rotate(-0.8deg);
+}
+
+/* On Olive Hero Backgrounds */
+.on-olive .kindsight-italic-spark {
+  color: var(--color-chartreuse-spark);
+}
+.on-olive .kindsight-italic-spark::after {
+  background: rgba(225, 240, 121, 0.35);
+}
+
+/* Cards — 24px Radius, Soft Linen Canvas, Hairline Border */
+.glass-card {
+  background: var(--color-soft-linen);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-cards);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+  color: var(--color-ink-black);
+}
+
+.glass-card:hover {
+  border-color: rgba(14, 15, 10, 0.2);
+  box-shadow: var(--shadow-md);
+}
+
+.glass-card-interactive {
+  cursor: pointer;
+  text-decoration: none;
+}
+.glass-card-interactive:hover {
+  transform: translateY(-2px);
+  border-color: rgba(14, 15, 10, 0.25);
+  box-shadow: var(--shadow-md);
+}
+
+/* Buttons — Terracotta Primary, Chartreuse Ghost, Olive Outline */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  font-family: var(--font-founders-grotesk);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  border-radius: var(--radius-buttons);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--color-terracotta-cta);
+  color: var(--color-pure-white);
+  border: none;
+  border-radius: var(--radius-buttons);
+  box-shadow: none;
+}
+.btn-primary:hover {
+  background: var(--color-terracotta-hover);
+  color: var(--color-pure-white);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--color-soft-linen);
+  color: var(--color-ink-black);
+  border: 1px solid var(--border-color);
+}
+.btn-secondary:hover {
+  background: var(--color-cream-paper);
+  border-color: var(--color-ink-black);
+}
+
+.btn-ghost, .btn-chartreuse {
+  background: var(--color-chartreuse-spark);
+  color: var(--color-ink-black);
+  border-radius: var(--radius-buttons);
+}
+.btn-ghost:hover, .btn-chartreuse:hover {
+  background: #d4e466;
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-ink-black);
+  border: 1px solid var(--color-ink-black);
+  border-radius: var(--radius-buttons);
+}
+.btn-outline:hover {
+  background: rgba(14, 15, 10, 0.05);
+}
+
+.btn-coral-pill {
+  background: transparent;
+  color: var(--color-coral-outline);
+  border: 2px solid var(--color-coral-outline);
+  border-radius: var(--radius-full);
+  padding: 12px 24px;
+}
+.btn-coral-pill:hover {
+  background: rgba(231, 87, 61, 0.08);
+}
+
+.btn-success {
+  background: var(--color-olive-grove);
+  color: var(--color-chartreuse-spark);
+}
+.btn-success:hover {
+  background: var(--color-deep-olive);
+}
+
+.btn-danger {
+  background: var(--color-coral-outline);
+  color: var(--color-pure-white);
+}
+.btn-danger:hover {
+  background: #d4472f;
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 13px;
+  border-radius: 8px;
+}
+
+.btn-lg {
+  padding: 14px 28px;
+  font-size: 16px;
+  border-radius: var(--radius-buttons);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Badges — 18px Radius */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: var(--radius-badges);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.badge-low {
+  background: #eff6e8;
+  color: #355e3b;
+  border: 1px solid #cce3be;
+}
+.badge-medium {
+  background: #fdf6ec;
+  color: #c26d24;
+  border: 1px solid #fae3c3;
+}
+.badge-high {
+  background: #fdf0ed;
+  color: #de7653;
+  border: 1px solid #f8cdc2;
+}
+.badge-critical {
+  background: #fbebee;
+  color: #ba2817;
+  border: 1px solid #f4c2c8;
+}
+
+.badge-info {
+  background: #f3f0e8;
+  color: var(--color-olive-grove);
+  border: 1px solid #ddd7c7;
+}
+
+.badge-chartreuse {
+  background: var(--color-chartreuse-spark);
+  color: var(--color-ink-black);
+  border: 1px solid #d4e466;
+}
+
+/* Forms & Inputs — 10px Radius, Deep Olive Border, Soft Linen Fill */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-ink-black);
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--color-soft-linen);
+  border: 1px solid var(--color-deep-olive);
+  border-radius: var(--radius-inputs);
+  color: var(--color-deep-olive);
+  font-family: var(--font-founders-grotesk);
+  font-size: 15px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.form-input::placeholder, .form-textarea::placeholder {
+  color: rgba(14, 15, 10, 0.4);
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--color-chartreuse-spark);
+  box-shadow: 0 0 0 2px var(--color-chartreuse-spark);
+  background: var(--color-soft-linen);
+}
+
+.form-select option {
+  background-color: var(--color-soft-linen);
+  color: var(--color-ink-black);
+}
+
+/* Layout Utilities */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.grid {
+  display: grid;
+  gap: 20px;
+}
+
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+@media (max-width: 1024px) {
+  .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .grid-cols-4, .grid-cols-3, .grid-cols-2 { grid-template-columns: 1fr; }
+}
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.gap-2 { gap: 8px; }
+.gap-4 { gap: 16px; }
+.gap-6 { gap: 24px; }
+
+/* Stat Card */
+.stat-card {
+  background: var(--color-soft-linen);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-cards);
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-warm-sand);
+  color: var(--color-olive-grove);
+  border: 1px solid var(--border-color);
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(14, 15, 10, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-content {
+  background: var(--color-soft-linen);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-cards);
+  max-width: 600px;
+  width: 100%;
+  padding: 36px;
+  box-shadow: var(--shadow-lg);
+  max-height: 90vh;
+  overflow-y: auto;
+  color: var(--color-ink-black);
+}
+
+/* Table Utilities */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+th {
+  text-align: left;
+  padding: 14px 18px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+  background: var(--color-cream-paper);
+}
+
+td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--color-ink-black);
+}
+
+tr:hover td {
+  background: rgba(250, 245, 241, 0.6);
+}
