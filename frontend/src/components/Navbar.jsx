@@ -25,7 +25,8 @@ import {
   Calendar,
   User,
   Sparkles,
-  Edit3
+  Edit3,
+  Bot
 } from 'lucide-react';
 import { EditPatientProfileModal } from './EditPatientProfileModal';
 import '../styles/DashboardApollo.css';
@@ -79,6 +80,7 @@ export const Navbar = () => {
 
   const patientNavItems = [
     { path: '/', label: 'Passport', icon: ShieldCheck },
+    { path: '/assistant', label: 'AI Assistant', icon: Bot },
     { path: '/reports', label: 'Medical Reports', icon: FileText },
     { path: '/facilities', label: 'Facilities', icon: Building2 },
     { path: '/my-journey', label: 'My Journey', icon: Clock },
@@ -88,6 +90,7 @@ export const Navbar = () => {
 
   const doctorNavItems = [
     { path: '/', label: 'Consultation Queue', icon: Clock },
+    { path: '/assistant', label: 'AI Assistant', icon: Bot },
     { path: '/patients', label: 'My Patients', icon: Users },
     { path: '/reports', label: 'Medical Reports', icon: FileText },
     { path: '/referrals', label: 'Referrals', icon: ArrowRightLeft },
@@ -95,6 +98,7 @@ export const Navbar = () => {
 
   const adminNavItems = [
     { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/assistant', label: 'AI Assistant', icon: Bot },
     { path: '/checkin', label: 'Check-In Terminal', icon: Scan },
     { path: '/reports', label: 'Medical Reports', icon: FileText },
     { path: '/facilities', label: 'Facilities', icon: Building2 },

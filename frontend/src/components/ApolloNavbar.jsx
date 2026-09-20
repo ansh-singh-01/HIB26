@@ -35,6 +35,11 @@ export const ApolloNavbar = ({ currentPage = 'landing' }) => {
                 FAQ
               </a>
             </li>
+            <li className="apollo-nav-item">
+              <Link to="/assistant" className="apollo-nav-link" style={{ color: '#059669', fontWeight: 600 }}>
+                AI Assistant
+              </Link>
+            </li>
           </ul>
         )}
 

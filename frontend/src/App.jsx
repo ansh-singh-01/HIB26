@@ -19,6 +19,7 @@ import { ConsentPrivacy } from './pages/ConsentPrivacy';
 import { PatientHealthHub } from './pages/PatientHealthHub';
 import { HospitalCheckInTerminal } from './pages/HospitalCheckInTerminal';
 import { MedicalReports } from './pages/MedicalReports';
+import { ClinicalAssistant } from './pages/ClinicalAssistant';
 import { useLocation } from 'react-router-dom';
 
 const ProtectedRoute = ({ children }) => {
@@ -189,6 +190,15 @@ export const AppContent = () => {
           <Route
             path="/medical-reports"
             element={<Navigate to="/reports" replace />}
+          />
+
+          <Route
+            path="/assistant"
+            element={<ClinicalAssistant />}
+          />
+          <Route
+            path="/chat"
+            element={<Navigate to="/assistant" replace />}
           />
 
           <Route
