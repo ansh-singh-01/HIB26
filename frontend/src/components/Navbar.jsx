@@ -25,7 +25,8 @@ import {
   Calendar,
   User,
   Sparkles,
-  Edit3
+  Edit3,
+  Bot
 } from 'lucide-react';
 import { EditPatientProfileModal } from './EditPatientProfileModal';
 import { useLanguage } from '../context/LanguageContext';
@@ -82,6 +83,7 @@ export const Navbar = () => {
 
   const patientNavItems = [
     { path: '/', label: t('nav.passport'), icon: ShieldCheck },
+    { path: '/assistant', label: t('nav.ai_assistant') || 'AI Assistant', icon: Bot },
     { path: '/reports', label: t('nav.reports'), icon: FileText },
     { path: '/facilities', label: t('nav.facilities'), icon: Building2 },
     { path: '/my-journey', label: t('nav.journey'), icon: Clock },
@@ -91,6 +93,7 @@ export const Navbar = () => {
 
   const doctorNavItems = [
     { path: '/', label: t('nav.queue'), icon: Clock },
+    { path: '/assistant', label: t('nav.ai_assistant') || 'AI Assistant', icon: Bot },
     { path: '/patients', label: t('nav.patients'), icon: Users },
     { path: '/reports', label: t('nav.reports'), icon: FileText },
     { path: '/referrals', label: t('nav.referrals'), icon: ArrowRightLeft },
@@ -98,6 +101,7 @@ export const Navbar = () => {
 
   const adminNavItems = [
     { path: '/', label: t('nav.dashboard'), icon: LayoutDashboard },
+    { path: '/assistant', label: t('nav.ai_assistant') || 'AI Assistant', icon: Bot },
     { path: '/checkin', label: t('nav.checkin'), icon: Scan },
     { path: '/reports', label: t('nav.reports'), icon: FileText },
     { path: '/facilities', label: t('nav.facilities'), icon: Building2 },

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, ArrowRight, ChevronDown } from 'lucide-react';
+import { Activity, ArrowRight, ChevronDown, PhoneCall } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { LanguageToggle } from './LanguageToggle';
 
@@ -16,7 +16,7 @@ export const ApolloNavbar = ({ currentPage = 'landing' }) => {
           </div>
           <div className="apollo-brand-text">
             <span className="apollo-brand-name">
-              Medi<span>Connect</span>
+              Re<span>medi</span>
             </span>
             <span className="apollo-brand-tagline">{t('nav.brand_tagline')}</span>
           </div>
@@ -38,6 +38,11 @@ export const ApolloNavbar = ({ currentPage = 'landing' }) => {
               <a href="/#faq" className="apollo-nav-link">
                 {t('nav.faq')}
               </a>
+            </li>
+            <li className="apollo-nav-item">
+              <Link to="/assistant" className="apollo-nav-link" style={{ color: '#059669', fontWeight: 600 }}>
+                AI Assistant
+              </Link>
             </li>
           </ul>
         )}
@@ -74,6 +79,21 @@ export const ApolloNavbar = ({ currentPage = 'landing' }) => {
               </Link>
             </>
           )}
+
+          <a
+            href="tel:108"
+            id="apollo-sos-call-btn"
+            className="apollo-btn-sos"
+            aria-label="Direct Emergency Ambulance Call 108"
+            title="Emergency Ambulance: Directly open dial pad with 108"
+            onClick={() => {
+              window.location.href = 'tel:108';
+            }}
+          >
+            <span className="apollo-sos-pulse-ring" aria-hidden="true"></span>
+            <PhoneCall size={15} className="apollo-sos-icon" />
+            <span className="apollo-sos-text">SOS 108</span>
+          </a>
         </div>
       </header>
     </div>

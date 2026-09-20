@@ -110,12 +110,12 @@ export const LandingPage = () => {
   const faqs = isHindi
     ? [
         {
-          q: 'मेडीकनेक्ट एआई ट्राइएज के साथ मरीज की सुरक्षा कैसे सुनिश्चित करता है?',
-          a: 'मेडीकनेक्ट दोहरी-परत सुरक्षा तकनीक का उपयोग करता है। गंभीर शारीरिक मानदंड (जैसे SpO2 < 90%, तीव्र हृदय गति, या सीने में तेज दर्द) तुरंत आपातकालीन प्रोटोकॉल सक्रिय करते हैं। सामान्य गैर-गंभीर स्थितियों में पारदर्शी व्याख्या के साथ क्लिनिकल भाषा मॉडल का उपयोग होता है।'
+          q: 'Remedi एआई ट्राइएज के साथ मरीज की सुरक्षा कैसे सुनिश्चित करता है?',
+          a: 'Remedi दोहरी-परत सुरक्षा तकनीक का उपयोग करता है। गंभीर शारीरिक मानदंड (जैसे SpO2 < 90%, तीव्र हृदय गति, या सीने में तेज दर्द) तुरंत आपातकालीन प्रोटोकॉल सक्रिय करते हैं। सामान्य गैर-गंभीर स्थितियों में पारदर्शी व्याख्या के साथ क्लिनिकल भाषा मॉडल का उपयोग होता है।'
         },
         {
-          q: 'क्या मेडीकनेक्ट अस्पताल के मौजूदा ईएचआर सिस्टम से जुड़ सकता है?',
-          a: 'हाँ, मेडीकनेक्ट स्वाभाविक रूप से HL7 FHIR मानकों, Epic, Cerner और कस्टम REST/WebSocket एपीआई का समर्थन करता है। द्वि-दिशात्मक डेटा समन्वयन यह सुनिश्चित करता है कि रेफरल और विटल्स स्वचालित रूप से अपडेट हों।'
+          q: 'क्या Remedi अस्पताल के मौजूदा ईएचआर सिस्टम से जुड़ सकता है?',
+          a: 'हाँ, Remedi स्वाभाविक रूप से HL7 FHIR मानकों, Epic, Cerner और कस्टम REST/WebSocket एपीआई का समर्थन करता है। द्वि-दिशात्मक डेटा समन्वयन यह सुनिश्चित करता है कि रेफरल और विटल्स स्वचालित रूप से अपडेट हों।'
         },
         {
           q: 'रीयल-टाइम में गतिशील अस्पताल बेड रूटिंग कैसे काम करती है?',
@@ -126,22 +126,22 @@ export const LandingPage = () => {
           a: 'बिल्कुल। सभी स्वास्थ्य डेटा 256-बिट एईएस से एन्क्रिप्टेड है और मरीज की डिजिटल सहमति के बिना किसी के साथ साझा नहीं किया जाता। यह आयुष्मान भारत डिजिटल मिशन (ABDM) और भारतीय डेटा संरक्षण अधिनियम के पूर्णतः अनुरूप है।'
         },
         {
-          q: 'क्या मेडीकनेक्ट क्षेत्रीय भाषाओं में उपलब्ध है?',
-          a: 'हाँ! मेडीकनेक्ट पूरे भारत के लिए सुलभ बनाया गया है, जिसमें एक क्लिक में अंग्रेजी और हिन्दी के बीच स्विच करने की सुविधा उपलब्ध है।'
+          q: 'क्या Remedi क्षेत्रीय भाषाओं में उपलब्ध है?',
+          a: 'हाँ! Remedi पूरे भारत के लिए सुलभ बनाया गया है, जिसमें एक क्लिक में अंग्रेजी और हिन्दी के बीच स्विच करने की सुविधा उपलब्ध है।'
         },
         {
-          q: 'क्या मेडीकनेक्ट को कई स्वतंत्र क्लीनिकों और अस्पतालों में तैनात किया जा सकता है?',
-          a: 'हाँ, मेडीकनेक्ट को बहु-सुविधा स्वास्थ्य ग्रिड के रूप में बनाया गया है, जिससे सरकारी और निजी अस्पताल, प्राथमिक स्वास्थ्य केंद्र (PHC), और एम्बुलेंस नेटवर्क एक साथ मिलकर काम कर सकते हैं।'
+          q: 'क्या Remedi को कई स्वतंत्र क्लीनिकों और अस्पतालों में तैनात किया जा सकता है?',
+          a: 'हाँ, Remedi को बहु-सुविधा स्वास्थ्य ग्रिड के रूप में बनाया गया है, जिससे सरकारी और निजी अस्पताल, प्राथमिक स्वास्थ्य केंद्र (PHC), और एम्बुलेंस नेटवर्क एक साथ मिलकर काम कर सकते हैं।'
         }
       ]
     : [
         {
-          q: 'How does MediConnect ensure patient safety with AI triage?',
-          a: 'MediConnect employs a dual-layer safety architecture. Critical physiologic rule thresholds (such as SpO2 < 90%, extreme tachycardia, or acute chest trauma) immediately trigger hard-coded clinical emergency overrides. Secondary non-critical assessments utilize fine-tuned clinical LLMs with transparent rationale explanations.'
+          q: 'How does Remedi ensure patient safety with AI triage?',
+          a: 'Remedi employs a dual-layer safety architecture. Critical physiologic rule thresholds (such as SpO2 < 90%, extreme tachycardia, or acute chest trauma) immediately trigger hard-coded clinical emergency overrides. Secondary non-critical assessments utilize fine-tuned clinical LLMs (Gemini 1.5) with transparent rationale explanations.'
         },
         {
-          q: 'Does MediConnect integrate with our hospital existing EHR system?',
-          a: 'Yes. MediConnect natively supports HL7 FHIR standards, Epic Systems, Cerner/Oracle Health, and custom REST/WebSocket feeds. Data bidirectional synchronization ensures referrals and vitals automatically link with patient master indexes.'
+          q: 'Does Remedi integrate with our hospital existing EHR system?',
+          a: 'Yes. Remedi natively supports HL7 FHIR standards, Epic Systems, Cerner/Oracle Health, and custom REST/WebSocket feeds. Data bidirectional synchronization ensures referrals and vitals automatically link with patient master indexes.'
         },
         {
           q: 'How does the dynamic hospital bed routing work in real time?',
@@ -152,31 +152,17 @@ export const LandingPage = () => {
           a: 'We support Bluetooth LE (BLE), cellular IoT monitors, smartwatch health telemetry, and standard clinical bedside monitors via MQTT and WebSockets. Telemetry feeds track SpO2, heart rate, non-invasive blood pressure, and core body temperature.'
         },
         {
-          q: 'Is MediConnect compliant with ABDM & DPDP privacy acts?',
+          q: 'Is Remedi HIPAA, ABDM & DPDP privacy acts compliant?',
           a: 'Absolutely. All patient identifiable data is encrypted at rest using AES-256 and in transit via TLS 1.3. We enforce strict role-based access controls (RBAC) across Patients, Triage Nurses, Doctors, and Hospital Admins, complete with immutable audit logs.'
         },
         {
-          q: 'Can regional health authorities deploy MediConnect across multiple independent clinics?',
-          a: 'Yes. MediConnect is designed from the ground up for multi-facility health grids, permitting independent hospitals, rural satellite clinics, and emergency ambulance fleets to federate on a single coordinated grid.'
+          q: 'Can regional health authorities deploy Remedi across multiple independent clinics?',
+          a: 'Yes. Remedi is designed from the ground up for multi-facility health grids, permitting independent hospitals, rural satellite clinics, and emergency ambulance fleets to federate on a single coordinated grid.'
         }
       ];
 
   return (
     <div className="apollo-landing">
-      {/* ===================================================================
-          0. Promotional Announcement Strip (Kindsight Style)
-          =================================================================== */}
-      <div className="kindsight-top-strip">
-        <span className="kindsight-strip-badge">
-          {isHindi ? '2026 राष्ट्रीय ग्रिड रिलीज' : '2026 Grid Release'}
-        </span>
-        <span>
-          {isHindi
-            ? 'क्षेत्रीय एआई ट्राइएज टेलीमेट्री और रियल-टाइम आईसीयू समन्वय अब सक्रिय है।'
-            : 'Regional AI triage telemetry & real-time bed coordination is now operational.'}
-        </span>
-      </div>
-
       {/* ===================================================================
           1. Sticky Navigation Bar (Kindsight Editorial Style)
           =================================================================== */}
@@ -738,88 +724,6 @@ export const LandingPage = () => {
       </section>
 
       {/* ===================================================================
-          Bento Grid Features Section
-          =================================================================== */}
-      <section id="features" className="apollo-bento-section">
-        <div className="apollo-container">
-          <div className="apollo-section-header">
-            <span className="apollo-kicker">Unified Clinical Infrastructure</span>
-            <h2 className="apollo-section-title">
-              Everything required to orchestrate care from symptom to <span className="kindsight-italic-spark">discharge</span>
-            </h2>
-            <p className="apollo-section-desc">
-              Replace disjointed clipboards, manual hospital phone calls, and siloed triage tools with one real-time clinical platform.
-            </p>
-          </div>
-
-          <div className="apollo-bento-grid">
-            {/* Card 1 (Large 8 cols) */}
-            <div className="apollo-bento-card col-8">
-              <div className="apollo-bento-icon">
-                <Sparkles size={24} />
-              </div>
-              <div>
-                <h3>Multimodal Clinical AI + Rule-Engine Safety Net</h3>
-                <p>
-                  Combines Google Gemini 1.5 multimodal reasoning with deterministic physiologic rule overrides. Severe symptoms and hypoxia trigger automatic emergency protocols with sub-second response times, providing doctors with complete explainability logs.
-                </p>
-              </div>
-              <div style={{ background: '#FAF8F5', border: '1px solid #E5E0D8', borderRadius: '12px', padding: '16px', display: 'flex', gap: '16px', alignItems: 'center' }}>
-                <span className="apollo-status-pill" style={{ background: '#0F172A', color: '#CEFF00', padding: '6px 12px', borderRadius: '6px' }}>
-                  Safety Rating A+
-                </span>
-                <span style={{ fontSize: '0.86rem', color: '#475569' }}>
-                  Compliant with clinical triage guideline protocols (ESI & Manchester Triage System).
-                </span>
-              </div>
-            </div>
-
-            {/* Card 2 (4 cols) */}
-            <div className="apollo-bento-card col-4">
-              <div className="apollo-bento-icon">
-                <Hospital size={24} />
-              </div>
-              <div>
-                <h3>Live Hospital Bed & ICU Telemetry</h3>
-                <p>
-                  Zero guesswork for emergency responders. Access live ward availability, specialized trauma capability, and automated bed reservation holds.
-                </p>
-              </div>
-              <Link to="/register" style={{ color: '#0F172A', fontWeight: 600, fontSize: '0.92rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                Explore Resource Grid <ArrowRight size={15} />
-              </Link>
-            </div>
-
-            {/* Card 3 (6 cols) */}
-            <div className="apollo-bento-card col-6">
-              <div className="apollo-bento-icon">
-                <Radio size={24} />
-              </div>
-              <div>
-                <h3>Continuous Wearable & IoT Streaming</h3>
-                <p>
-                  Stream real-time vitals directly from patient wearables, bedside monitors, and home pulse oximeters. Detect silent hypoxia and arrhythmias before decompensation occurs.
-                </p>
-              </div>
-            </div>
-
-            {/* Card 4 (6 cols) */}
-            <div className="apollo-bento-card col-6">
-              <div className="apollo-bento-icon">
-                <ShieldCheck size={24} />
-              </div>
-              <div>
-                <h3>Enterprise HIPAA & FHIR Compliance</h3>
-                <p>
-                  End-to-end 256-bit AES encryption, multi-tenant role-based access control, automated audit trails, and seamless compatibility with Epic, Cerner, and HL7 FHIR servers.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===================================================================
           FAQ Accordion Section
           =================================================================== */}
       <section id="faq" className="apollo-faq-section">
@@ -932,8 +836,8 @@ export const LandingPage = () => {
           <div className="apollo-footer-bottom">
             <div>
               {isHindi
-                ? '© 2026 मेडीकनेक्ट एआई। सर्वाधिकार सुरक्षित। भारतीय स्वास्थ्य सेवा ग्रिड के लिए निर्मित।'
-                : '© 2026 MediConnect AI Inc. All rights reserved. Built for the Indian Healthcare Grid.'}
+                ? '© 2026 Remedi AI Inc. सर्वाधिकार सुरक्षित। भारतीय स्वास्थ्य सेवा ग्रिड के लिए निर्मित।'
+                : '© 2026 Remedi AI Inc. All rights reserved. Built for the Indian Healthcare Grid.'}
             </div>
             <div className="apollo-status-pill">
               <span className="apollo-pulse-dot"></span>

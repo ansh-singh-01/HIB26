@@ -36,7 +36,7 @@ import os
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
-from app.api.v1.endpoints import auth, patients, risk, recommendations, referrals, followups, facilities, iot
+from app.api.v1.endpoints import auth, patients, risk, recommendations, referrals, followups, facilities, iot, chatbot
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(patients.router, prefix="/api/v1/patients", tags=["patients"])
@@ -46,6 +46,7 @@ app.include_router(referrals.router, prefix="/api/v1/referrals", tags=["care-fol
 app.include_router(followups.router, prefix="/api/v1", tags=["care-followup"])
 app.include_router(facilities.router, prefix="/api/v1/facilities", tags=["resource-matching"])
 app.include_router(iot.router, prefix="/api/v1/iot", tags=["iot-telemetry"])
+app.include_router(chatbot.router, prefix="/api/v1/chatbot", tags=["clinical-chatbot"])
 
 STATIC_DIR = "static"
 app.mount("/assets", StaticFiles(directory=os.path.join(STATIC_DIR, "assets")), name="static-assets")

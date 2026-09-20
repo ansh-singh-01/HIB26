@@ -27,6 +27,7 @@ export const translations = {
       profile_title_patient: 'Patient Profile & Health Identity',
       profile_title_provider: 'Healthcare Provider Account',
       view_profile: 'View Profile',
+      ai_assistant: 'AI Assistant',
     },
     landing: {
       hero_badge: "INDIA'S UNIFIED SMART HEALTHCARE ROUTING",
@@ -188,6 +189,7 @@ export const translations = {
       profile_title_patient: 'मरीज प्रोफ़ाइल और स्वास्थ्य पहचान',
       profile_title_provider: 'स्वास्थ्य सेवा प्रदाता खाता',
       view_profile: 'प्रोफ़ाइल देखें',
+      ai_assistant: 'एआई सहायक',
     },
     landing: {
       hero_badge: 'भारत का एकीकृत स्मार्ट स्वास्थ्य सेवा नेटवर्क',

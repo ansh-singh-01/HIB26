@@ -20,6 +20,8 @@ import { ConsentPrivacy } from './pages/ConsentPrivacy';
 import { PatientHealthHub } from './pages/PatientHealthHub';
 import { HospitalCheckInTerminal } from './pages/HospitalCheckInTerminal';
 import { MedicalReports } from './pages/MedicalReports';
+import { ClinicalAssistant } from './pages/ClinicalAssistant';
+import { RemediChatWidget } from './components/RemediChatWidget';
 import { useLocation } from 'react-router-dom';
 
 const ProtectedRoute = ({ children }) => {
@@ -100,6 +102,10 @@ export const AppContent = () => {
   const isAuthOrLanding =
     ['/landing', '/login', '/register'].includes(location.pathname) ||
     (!user && location.pathname === '/');
+
+  const hideChatWidget = ['/login', '/register', '/assistant', '/chat'].some(
+    (p) => location.pathname.startsWith(p)
+  );
 
   return (
     <div>
@@ -193,6 +199,15 @@ export const AppContent = () => {
           />
 
           <Route
+            path="/assistant"
+            element={<ClinicalAssistant />}
+          />
+          <Route
+            path="/chat"
+            element={<Navigate to="/assistant" replace />}
+          />
+
+          <Route
             path="/triage"
             element={
               <ProtectedRoute>
@@ -245,6 +260,8 @@ export const AppContent = () => {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+      {/* Floating chatbot popup — hidden on full assistant page & auth pages */}
+      {!hideChatWidget && <RemediChatWidget />}
     </div>
   );
 };

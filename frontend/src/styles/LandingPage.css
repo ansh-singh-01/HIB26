@@ -241,6 +241,25 @@
   }
 }
 
+@media (max-width: 640px) {
+  .apollo-nav-actions {
+    gap: 8px;
+  }
+  .apollo-btn-ghost {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  .apollo-btn-primary {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+  .apollo-btn-sos {
+    padding: 8px 12px;
+    font-size: 13px;
+    gap: 5px;
+  }
+}
+
 /* Restrained Login Outlined Button */
 .apollo-btn-ghost {
   padding: 8px 20px;
@@ -280,6 +299,78 @@
   background: var(--color-terracotta-hover);
   color: var(--color-pure-white);
   transform: translateY(-1px);
+}
+
+/* Emergency Live SOS Direct Call Button */
+.apollo-btn-sos {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff !important;
+  padding: 10px 18px;
+  border-radius: var(--radius-buttons);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 2px 10px rgba(220, 38, 38, 0.35);
+  cursor: pointer;
+  position: relative;
+  transition: var(--transition-smooth);
+}
+
+.apollo-btn-sos:hover {
+  background: linear-gradient(135deg, #f87171 0%, #b91c1c 100%);
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(220, 38, 38, 0.55);
+}
+
+.apollo-btn-sos:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
+}
+
+.apollo-sos-icon {
+  display: inline-block;
+  animation: apollo-sos-ring 2.8s infinite ease-in-out;
+}
+
+@keyframes apollo-sos-ring {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  4% { transform: rotate(14deg) scale(1.1); }
+  8% { transform: rotate(-14deg) scale(1.1); }
+  12% { transform: rotate(12deg); }
+  16% { transform: rotate(-12deg); }
+  20% { transform: rotate(0deg) scale(1); }
+}
+
+.apollo-sos-pulse-ring {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8);
+  animation: apollo-sos-pulse 1.8s infinite;
+}
+
+@keyframes apollo-sos-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
 }
 
 /* Outline Ghost CTA in Chartreuse */
@@ -2208,3 +2299,339 @@
   color: var(--apollo-text-muted);
 }
 
+/* ==========================================================================
+   Floating Chatbot Widget (Bottom-Right Popup)
+   ========================================================================== */
+.remedi-chat-fab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.remedi-chat-fab > * {
+  pointer-events: auto;
+}
+
+/* The floating action button (toggle) */
+.remedi-fab-toggle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 24px rgba(5, 150, 105, 0.45), 0 2px 8px rgba(0,0,0,0.18);
+  transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease;
+  position: relative;
+}
+
+.remedi-fab-toggle:hover {
+  transform: scale(1.08);
+  box-shadow: 0 10px 30px rgba(5,150,105,0.55);
+}
+
+.remedi-fab-toggle.is-open {
+  background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%);
+  box-shadow: 0 6px 24px rgba(239, 68, 68, 0.45);
+}
+
+/* Unread badge on the FAB */
+.remedi-fab-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  background: #EF4444;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The popup panel */
+.remedi-chat-popup {
+  width: 380px;
+  height: 560px;
+  background: #FFFFFF;
+  border-radius: 18px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.18), 0 6px 20px rgba(0,0,0,0.10);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform-origin: bottom right;
+  animation: remediPopupIn 0.28s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes remediPopupIn {
+  from {
+    opacity: 0;
+    transform: scale(0.75) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.remedi-chat-popup.closing {
+  animation: remediPopupOut 0.2s ease forwards;
+}
+
+@keyframes remediPopupOut {
+  to {
+    opacity: 0;
+    transform: scale(0.85) translateY(12px);
+  }
+}
+
+/* Popup header */
+.remedi-popup-header {
+  background: linear-gradient(135deg, #065F46 0%, #047857 50%, #059669 100%);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.remedi-popup-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.remedi-popup-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.remedi-popup-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.remedi-popup-subtitle {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.78);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.remedi-online-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #6EE7B7;
+  animation: pulse 2s infinite;
+  display: inline-block;
+}
+
+.remedi-popup-close {
+  background: rgba(255,255,255,0.15);
+  border: none;
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+  transition: background 0.2s;
+}
+.remedi-popup-close:hover {
+  background: rgba(255,255,255,0.28);
+}
+
+/* Popup body — scrollable messages */
+.remedi-popup-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 14px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #F8FAFC;
+}
+
+.remedi-popup-body::-webkit-scrollbar {
+  width: 4px;
+}
+.remedi-popup-body::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 4px;
+}
+
+/* Message bubbles */
+.remedi-msg {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.remedi-msg.user {
+  flex-direction: row-reverse;
+}
+
+.remedi-msg-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #E5E7EB;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.remedi-msg-bubble {
+  max-width: 80%;
+  padding: 9px 13px;
+  border-radius: 14px;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.remedi-msg.bot .remedi-msg-bubble {
+  background: #FFFFFF;
+  color: #1F2937;
+  border: 1px solid #E5E7EB;
+  border-bottom-left-radius: 4px;
+}
+
+.remedi-msg.user .remedi-msg-bubble {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: #FFFFFF;
+  border-bottom-right-radius: 4px;
+}
+
+/* Typing indicator */
+.remedi-typing {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 14px;
+  border-bottom-left-radius: 4px;
+  width: fit-content;
+}
+
+.remedi-typing span {
+  width: 6px;
+  height: 6px;
+  background: #9CA3AF;
+  border-radius: 50%;
+  animation: typingDot 1.2s infinite;
+}
+.remedi-typing span:nth-child(2) { animation-delay: 0.2s; }
+.remedi-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingDot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-5px); opacity: 1; }
+}
+
+/* Popup input area */
+.remedi-popup-input {
+  padding: 12px 14px;
+  background: #FFFFFF;
+  border-top: 1px solid #E5E7EB;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.remedi-popup-input input {
+  flex: 1;
+  border: 1px solid #E5E7EB;
+  border-radius: 20px;
+  padding: 9px 14px;
+  font-size: 0.85rem;
+  outline: none;
+  background: #F9FAFB;
+  transition: border-color 0.2s;
+}
+
+.remedi-popup-input input:focus {
+  border-color: #059669;
+}
+
+.remedi-popup-send {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 8px rgba(5,150,105,0.3);
+}
+.remedi-popup-send:hover {
+  transform: scale(1.08);
+}
+.remedi-popup-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Full-page link inside popup */
+.remedi-popup-expand {
+  font-size: 0.72rem;
+  color: #059669;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px 10px;
+  justify-content: flex-end;
+  background: #fff;
+}
+.remedi-popup-expand:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 440px) {
+  .remedi-chat-popup {
+    width: calc(100vw - 32px);
+    height: 75vh;
+    border-radius: 14px;
+  }
+  .remedi-chat-fab {
+    bottom: 16px;
+    right: 16px;
+  }
+}

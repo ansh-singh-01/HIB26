@@ -29,7 +29,9 @@ import {
   Navigation,
   Lock,
   Scan,
-  Edit3
+  Edit3,
+  Bot,
+  WifiOff
 } from 'lucide-react';
 import { EditPatientProfileModal } from '../components/EditPatientProfileModal';
 import { DoctorQueue } from './DoctorQueue';
@@ -381,6 +383,10 @@ export const Dashboard = () => {
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Link to="/assistant" className="apollo-dash-btn-secondary" style={{ padding: '8px 16px', fontSize: '0.82rem', background: '#ECFDF5', borderColor: '#A7F3D0', color: '#065F46', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                  <Bot size={15} /> AI Triage Bot
+                </Link>
+
                 {passport?.current_care?.has_active_referral ? (
                   <Link to="/facilities" className="apollo-dash-btn-primary" style={{ padding: '8px 16px', fontSize: '0.82rem' }}>
                     <Navigation size={15} /> Get Directions
@@ -395,6 +401,76 @@ export const Dashboard = () => {
                   <PhoneCall size={15} /> SOS 108
                 </a>
               </div>
+            </div>
+
+            {/* Offline-Ready AI Clinical Triage Quick Access Card */}
+            <div style={{
+              background: 'linear-gradient(135deg, #064E3B 0%, #065F46 100%)',
+              borderRadius: '12px',
+              padding: '16px 20px',
+              color: '#FAF5F1',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '14px',
+              boxShadow: '0 4px 14px rgba(6, 78, 59, 0.2)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '10px',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#FFFFFF'
+                }}>
+                  <Bot size={22} />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <h4 style={{ margin: 0, fontSize: '0.96rem', fontWeight: '700', color: '#FAF5F1' }}>
+                      24/7 AI Clinical Triage Assistant
+                    </h4>
+                    <span style={{
+                      background: 'rgba(255, 255, 255, 0.18)',
+                      color: '#A7F3D0',
+                      padding: '2px 7px',
+                      borderRadius: '8px',
+                      fontSize: '0.7rem',
+                      fontWeight: '600'
+                    }}>
+                      SQLite Offline Ready
+                    </span>
+                  </div>
+                  <p style={{ margin: '2px 0 0', fontSize: '0.8rem', color: '#D1FAE5' }}>
+                    Input disease, symptoms, or problem for immediate first-aid, triage urgency, and recommended next steps.
+                  </p>
+                </div>
+              </div>
+
+              <Link
+                to="/assistant"
+                style={{
+                  background: '#FFFFFF',
+                  color: '#065F46',
+                  padding: '8px 18px',
+                  borderRadius: '8px',
+                  fontWeight: '700',
+                  fontSize: '0.84rem',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+                }}
+              >
+                <span>Open Chatbot</span>
+                <ArrowRight size={14} />
+              </Link>
             </div>
 
             {/* C. DIGIYATRA FOUR CORE MODULES */}
