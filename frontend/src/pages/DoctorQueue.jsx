@@ -44,6 +44,7 @@ export const DoctorQueue = () => {
   const [selectedPatientForDossier, setSelectedPatientForDossier] = useState(null);
   const [selectedPatientForEncounter, setSelectedPatientForEncounter] = useState(null);
   const [dossierTab, setDossierTab] = useState('vitals'); // 'vitals' | 'allergies' | 'medications' | 'history' | 'tests'
+  const [dossierReportSearch, setDossierReportSearch] = useState('');
 
   // Encounter form state
   const [encounterForm, setEncounterForm] = useState({
@@ -986,31 +987,62 @@ export const DoctorQueue = () => {
                 </div>
               )}
 
-              {dossierTab === 'tests' && (
-                <div>
-                  <h4 style={{ margin: '0 0 14px 0', fontSize: '0.92rem', color: '#0F172A' }}>Recent Diagnostic Lab Reports</h4>
-                  {selectedPatientForDossier.recent_tests?.length > 0 ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                      {selectedPatientForDossier.recent_tests.map((t, i) => (
-                        <div key={i} style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', padding: '14px 16px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                            <strong style={{ color: '#0F172A', fontSize: '0.92rem' }}>{t.test_name}</strong>
-                            <span style={{ fontSize: '0.75rem', color: '#64748B' }}>{t.date}</span>
-                          </div>
-                          <span style={{ background: '#EFF6FF', color: '#2563EB', fontSize: '0.7rem', fontWeight: 600, padding: '1px 6px', borderRadius: '4px', display: 'inline-block', marginBottom: '6px' }}>
-                            {t.category}
-                          </span>
-                          <p style={{ margin: 0, color: '#475569', fontSize: '0.82rem', lineHeight: 1.4 }}>
-                            {t.summary}
-                          </p>
-                        </div>
-                      ))}
+              {dossierTab === 'tests' && (() => {
+                const tests = selectedPatientForDossier.recent_tests || [];
+                const filteredTests = tests.filter((t) => {
+                  const q = dossierReportSearch.toLowerCase().trim();
+                  return !q ||
+                    t.test_name?.toLowerCase().includes(q) ||
+                    t.category?.toLowerCase().includes(q) ||
+                    t.summary?.toLowerCase().includes(q);
+                });
+                return (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+                      <h4 style={{ margin: 0, fontSize: '0.92rem', color: '#0F172A' }}>Recent Diagnostic Lab Reports</h4>
+                      <div style={{ position: 'relative', minWidth: '220px' }}>
+                        <Search size={14} color="#94A3B8" style={{ position: 'absolute', left: '10px', top: '9px' }} />
+                        <input
+                          type="text"
+                          placeholder="Search reports by name..."
+                          value={dossierReportSearch}
+                          onChange={(e) => setDossierReportSearch(e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '6px 12px 6px 30px',
+                            fontSize: '0.78rem',
+                            border: '1px solid #CBD5E1',
+                            borderRadius: '6px',
+                            outline: 'none',
+                          }}
+                        />
+                      </div>
                     </div>
-                  ) : (
-                    <p style={{ color: '#64748B', fontStyle: 'italic' }}>No diagnostic test records available.</p>
-                  )}
-                </div>
-              )}
+                    {filteredTests.length > 0 ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {filteredTests.map((t, i) => (
+                          <div key={i} style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', padding: '14px 16px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                              <strong style={{ color: '#0F172A', fontSize: '0.92rem' }}>{t.test_name}</strong>
+                              <span style={{ fontSize: '0.75rem', color: '#64748B' }}>{t.date}</span>
+                            </div>
+                            <span style={{ background: '#EFF6FF', color: '#2563EB', fontSize: '0.7rem', fontWeight: 600, padding: '1px 6px', borderRadius: '4px', display: 'inline-block', marginBottom: '6px' }}>
+                              {t.category}
+                            </span>
+                            <p style={{ margin: 0, color: '#475569', fontSize: '0.82rem', lineHeight: 1.4 }}>
+                              {t.summary}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p style={{ color: '#64748B', fontStyle: 'italic', padding: '12px 0' }}>
+                        {dossierReportSearch ? `No diagnostic reports matching "${dossierReportSearch}".` : 'No diagnostic test records available.'}
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Modal Footer */}
