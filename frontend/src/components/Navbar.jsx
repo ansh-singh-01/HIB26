@@ -189,14 +189,14 @@ export const Navbar = () => {
                   aria-label="Patient Profile and Identity"
                 >
                   <div className="apollo-user-avatar-circle">
-                    {getInitials(user.full_name || user.email)}
+                    {getInitials(user?.full_name || user?.email)}
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.1 }}>
                     <span className="apollo-user-name">
-                      {user.full_name || user.email.split('@')[0]}
+                      {user?.full_name || (user?.email ? user.email.split('@')[0] : 'User')}
                     </span>
                     <span className={`apollo-role-tag ${userRole}`} style={{ fontSize: '0.62rem', padding: '1px 5px', marginTop: '2px' }}>
-                      {user.role}
+                      {user?.role || 'PATIENT'}
                     </span>
                   </div>
                   <ChevronDown size={14} className="apollo-user-chip-chevron" />
@@ -256,17 +256,17 @@ export const Navbar = () => {
               {/* Hero Banner */}
               <div className="apollo-profile-hero">
                 <div className="apollo-profile-avatar-lg">
-                  {getInitials(passport?.full_name || user.full_name || user.email)}
+                  {getInitials(passport?.full_name || user?.full_name || user?.email)}
                 </div>
                 <div className="apollo-profile-hero-meta">
                   <div className="apollo-profile-hero-name">
-                    {passport?.full_name || user.full_name || user.email.split('@')[0]}
+                    {passport?.full_name || user?.full_name || (user?.email ? user.email.split('@')[0] : 'User')}
                   </div>
                   <div className="apollo-profile-hero-email">
-                    {user.email}
+                    {user?.email || '—'}
                   </div>
                   <span className={`apollo-role-tag ${userRole}`}>
-                    {isPatient ? 'Verified DigiYatra Citizen' : user.role}
+                    {isPatient ? 'Verified DigiYatra Citizen' : (user?.role || 'Provider')}
                   </span>
                 </div>
               </div>
