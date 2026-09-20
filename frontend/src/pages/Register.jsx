@@ -69,7 +69,7 @@ export const Register = () => {
           <div className="apollo-auth-logo">
             <Activity className="apollo-logo-mark" size={26} />
           </div>
-          <h2 className="apollo-auth-title">Create your account</h2>
+          <h2 className="apollo-auth-title">Create your <span className="kindsight-italic-spark">account</span></h2>
           <p className="apollo-auth-subtitle">
             Join the intelligent clinical triage and hospital resource routing grid
           </p>
@@ -201,7 +201,7 @@ export const Register = () => {
             disabled={loading}
             className="apollo-auth-submit-btn"
           >
-            {loading ? 'Creating Account...' : 'Complete Free Registration'}
+            {loading ? 'Creating Account...' : 'Sign Up'}
             <ArrowRight size={17} />
           </button>
         </form>
@@ -209,7 +209,7 @@ export const Register = () => {
         <div className="apollo-auth-footer">
           Already registered?
           <Link to="/login" className="apollo-auth-link">
-            Sign in to your account
+            Sign In
           </Link>
         </div>
 

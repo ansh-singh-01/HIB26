@@ -1429,3 +1429,313 @@
   font-size: 13px;
   color: #a8ad9d;
 }
+
+/* ==========================================================================
+   Kindsight Authentication Pages (Login & Register)
+   Warm Cream Paper canvas, 24px Soft Linen card, Deep Olive inputs,
+   Terracotta submit buttons, and Chartreuse highlights.
+   ========================================================================== */
+.apollo-auth-page {
+  background-color: var(--color-cream-paper);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: var(--color-ink-black);
+  font-family: var(--font-sans);
+}
+
+.apollo-auth-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px 72px;
+}
+
+.apollo-auth-card {
+  background: var(--color-soft-linen);
+  border: 1px solid var(--apollo-sand-border);
+  border-radius: var(--radius-cards); /* 24px */
+  max-width: 480px;
+  width: 100%;
+  padding: 40px;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-smooth);
+}
+
+.apollo-auth-card.register-card {
+  max-width: 520px;
+}
+
+.apollo-auth-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.apollo-auth-logo {
+  width: 48px;
+  height: 48px;
+  background: var(--color-olive-grove);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  color: var(--color-chartreuse-spark);
+}
+
+.apollo-auth-title {
+  font-family: var(--font-display);
+  font-size: 2.1rem;
+  font-weight: 300;
+  letter-spacing: -0.035em;
+  color: var(--color-ink-black);
+  margin-bottom: 8px;
+  line-height: 1.1;
+}
+
+.apollo-auth-subtitle {
+  font-size: 14px;
+  color: var(--apollo-text-secondary);
+  line-height: 1.5;
+}
+
+/* OAuth Social Buttons */
+.apollo-auth-oauth-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.apollo-auth-oauth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 16px;
+  background: var(--color-cream-paper);
+  border: 1px solid var(--apollo-sand-border);
+  border-radius: var(--radius-inputs); /* 10px */
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-ink-black);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.apollo-auth-oauth-btn:hover {
+  background: var(--color-warm-sand);
+  border-color: rgba(14, 15, 10, 0.25);
+}
+
+/* Divider */
+.apollo-auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+  color: var(--apollo-text-muted);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.apollo-auth-divider::before,
+.apollo-auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--apollo-sand-border);
+}
+
+.apollo-auth-divider span {
+  padding: 0 12px;
+}
+
+/* Demo Logins Banner */
+.apollo-auth-demo-banner {
+  background: var(--color-cream-paper);
+  border: 1px solid var(--apollo-sand-border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+
+.apollo-auth-demo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.apollo-auth-demo-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-olive-grove);
+}
+
+.apollo-auth-demo-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.apollo-auth-demo-pill {
+  flex: 1;
+  padding: 7px 12px;
+  background: var(--color-soft-linen);
+  border: 1px solid var(--apollo-sand-border);
+  border-radius: var(--radius-badges); /* 18px */
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-ink-black);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.apollo-auth-demo-pill:hover {
+  background: var(--color-chartreuse-spark);
+  border-color: #d3e268;
+}
+
+/* Error & Info Messages */
+.apollo-auth-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #fdf0ed;
+  border: 1px solid #f8cdc2;
+  color: var(--color-coral-outline);
+  padding: 12px 16px;
+  border-radius: var(--radius-inputs);
+  font-size: 13px;
+  margin-bottom: 18px;
+  line-height: 1.4;
+}
+
+/* Form & Inputs */
+.apollo-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.apollo-auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.apollo-auth-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-ink-black);
+}
+
+.apollo-auth-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.apollo-auth-input,
+.apollo-auth-select {
+  width: 100%;
+  padding: 12px 16px 12px 42px;
+  background: var(--color-cream-paper);
+  border: 1px solid var(--color-deep-olive);
+  border-radius: var(--radius-inputs); /* 10px */
+  font-family: var(--font-sans);
+  font-size: 15px;
+  color: var(--color-deep-olive);
+  outline: none;
+  transition: var(--transition-smooth);
+}
+
+.apollo-auth-input::placeholder {
+  color: rgba(14, 15, 10, 0.4);
+}
+
+.apollo-auth-input:focus,
+.apollo-auth-select:focus {
+  border-color: var(--color-chartreuse-spark);
+  box-shadow: 0 0 0 2px var(--color-chartreuse-spark);
+  background: var(--color-soft-linen);
+}
+
+.apollo-auth-input-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--apollo-text-muted);
+  pointer-events: none;
+}
+
+.apollo-auth-select {
+  cursor: pointer;
+  appearance: auto;
+}
+
+/* Primary Filled Terracotta Submit Button */
+.apollo-auth-submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--color-terracotta-cta);
+  color: var(--color-pure-white);
+  padding: 14px 24px;
+  border-radius: var(--radius-buttons); /* 10px */
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  margin-top: 6px;
+}
+
+.apollo-auth-submit-btn:hover {
+  background: var(--color-terracotta-hover);
+  transform: translateY(-1px);
+}
+
+.apollo-auth-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Footer Link & Trust */
+.apollo-auth-footer {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 14px;
+  color: var(--apollo-text-secondary);
+}
+
+.apollo-auth-link {
+  color: var(--color-terracotta-cta);
+  font-weight: 500;
+  text-decoration: none;
+  margin-left: 6px;
+  transition: var(--transition-smooth);
+}
+
+.apollo-auth-link:hover {
+  text-decoration: underline;
+  color: var(--color-terracotta-hover);
+}
+
+.apollo-auth-trust-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--apollo-sand-border);
+  font-size: 12px;
+  color: var(--apollo-text-muted);
+}
+

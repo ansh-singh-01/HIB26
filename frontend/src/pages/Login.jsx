@@ -68,7 +68,7 @@ export const Login = () => {
           <div className="apollo-auth-logo">
             <Activity className="apollo-logo-mark" size={26} />
           </div>
-          <h2 className="apollo-auth-title">Welcome back</h2>
+          <h2 className="apollo-auth-title">Welcome <span className="kindsight-italic-spark">back</span></h2>
           <p className="apollo-auth-subtitle">
             Sign in to access clinical triage, hospital resource routing, and IoT telemetry
           </p>
@@ -109,7 +109,7 @@ export const Login = () => {
         <div className="apollo-auth-demo-banner">
           <div className="apollo-auth-demo-header">
             <span className="apollo-auth-demo-label">Instant Demo Fill</span>
-            <span style={{ fontSize: '0.75rem', color: '#64748B' }}>Click to auto-populate</span>
+            <span style={{ fontSize: '0.75rem', color: '#666c5a' }}>Click to auto-populate</span>
           </div>
           <div className="apollo-auth-demo-buttons">
             <button
@@ -137,8 +137,8 @@ export const Login = () => {
         </div>
 
         {infoMessage && (
-          <div className="apollo-auth-error" style={{ background: 'rgba(16, 185, 129, 0.1)', borderColor: 'rgba(16, 185, 129, 0.3)', color: '#065F46' }}>
-            <CheckCircle2 size={18} color="#10B981" />
+          <div className="apollo-auth-error" style={{ background: '#eff6e8', borderColor: '#cce3be', color: '#355e3b' }}>
+            <CheckCircle2 size={18} color="#355e3b" />
             <span>{infoMessage}</span>
           </div>
         )}
@@ -169,7 +169,7 @@ export const Login = () => {
           <div className="apollo-auth-field">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <label className="apollo-auth-label">Password</label>
-              <a href="#forgot" onClick={(e) => { e.preventDefault(); alert('For demo purposes, please click any of the Instant Demo Fill buttons above.'); }} style={{ fontSize: '0.78rem', color: 'var(--apollo-blue)', textDecoration: 'none' }}>
+              <a href="#forgot" onClick={(e) => { e.preventDefault(); alert('For demo purposes, please click any of the Instant Demo Fill buttons above.'); }} style={{ fontSize: '0.78rem', color: 'var(--color-terracotta-cta)', textDecoration: 'none' }}>
                 Forgot password?
               </a>
             </div>
@@ -191,7 +191,7 @@ export const Login = () => {
             disabled={loading}
             className="apollo-auth-submit-btn"
           >
-            {loading ? 'Authenticating...' : 'Sign In to Health Grid'}
+            {loading ? 'Authenticating...' : 'Sign In'}
             <ArrowRight size={17} />
           </button>
         </form>
@@ -199,7 +199,7 @@ export const Login = () => {
         <div className="apollo-auth-footer">
           Don't have an account?
           <Link to="/register" className="apollo-auth-link">
-            Create an account free
+            Sign Up
           </Link>
         </div>
 
