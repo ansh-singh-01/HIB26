@@ -88,6 +88,22 @@ export const patientService = {
     const res = await api.put('/api/v1/patients/me', data);
     return res.data;
   },
+  getMyMedicalTests: async () => {
+    const res = await api.get('/api/v1/patients/me/medical-tests');
+    return res.data;
+  },
+  addMyMedicalTest: async (data) => {
+    const res = await api.post('/api/v1/patients/me/medical-tests', data);
+    return res.data;
+  },
+  addMyMedicalHistory: async (data) => {
+    const res = await api.post('/api/v1/patients/me/medical-history', data);
+    return res.data;
+  },
+  addMyAllergy: async (data) => {
+    const res = await api.post('/api/v1/patients/me/allergies', data);
+    return res.data;
+  },
   getMedications: async (id) => {
     const res = await api.get(`/api/v1/patients/${id}/medications`);
     return res.data;

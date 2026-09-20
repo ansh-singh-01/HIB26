@@ -88,6 +88,18 @@ async def _get_or_404(db: AsyncSession, current_user: User) -> Patient:
     result = await db.execute(select(Patient).where(Patient.user_id == current_user.id))
     patient = result.scalar_one_or_none()
     if not patient:
+        is_patient = (
+            current_user.role == UserRole.PATIENT or
+            str(current_user.role).lower() == "patient" or
+            "patient" in str(current_user.role).lower()
+        )
+        if is_patient:
+            patient = Patient(user_id=current_user.id)
+            _ensure_mc_id(patient)
+            db.add(patient)
+            await db.commit()
+            await db.refresh(patient)
+            return patient
         raise HTTPException(status_code=404, detail="Patient profile not found. Create one first via POST /me.")
     if not patient.medi_connect_id:
         _ensure_mc_id(patient)
@@ -507,6 +519,33 @@ async def add_my_medical_test(
     await db.commit()
     await db.refresh(test)
     return test
+
+
+@router.get("/me/allergies", response_model=List[PatientAllergyOut])
+async def list_my_allergies(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Retrieve all recorded allergies for the authenticated patient."""
+    patient = await _get_or_404(db, current_user)
+    result = await db.execute(select(PatientAllergy).where(PatientAllergy.patient_id == patient.id))
+    return result.scalars().all()
+
+
+@router.post("/me/allergies", response_model=PatientAllergyOut, status_code=201)
+async def add_my_allergy(
+    payload: PatientAllergyCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Add a reported allergy for the authenticated patient."""
+    patient = await _get_or_404(db, current_user)
+    data = payload.model_dump(exclude={"patient_id"})
+    allergy = PatientAllergy(patient_id=patient.id, **data)
+    db.add(allergy)
+    await db.commit()
+    await db.refresh(allergy)
+    return allergy
 
 
 # Medication Management
