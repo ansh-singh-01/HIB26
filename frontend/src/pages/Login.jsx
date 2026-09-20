@@ -71,22 +71,6 @@ export const Login = () => {
     }
   };
 
-  // Google OAuth — uses Google Identity Services
-  const handleGoogleLogin = () => {
-    const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
-    const REDIRECT_URI = `${window.location.origin}/auth/google/callback`;
-    const scope = 'openid email profile';
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${encodeURIComponent(scope)}&access_type=offline&prompt=select_account`;
-    window.location.href = authUrl;
-  };
-
-  // Apple OAuth — Sign In with Apple
-  const handleAppleLogin = () => {
-    const CLIENT_ID = import.meta.env.VITE_APPLE_CLIENT_ID || 'YOUR_APPLE_SERVICE_ID';
-    const REDIRECT_URI = `${window.location.origin}/auth/apple/callback`;
-    const authUrl = `https://appleid.apple.com/auth/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code%20id_token&scope=name%20email&response_mode=form_post`;
-    window.location.href = authUrl;
-  };
 
   return (
     <div className="apollo-auth-page">
