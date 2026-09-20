@@ -45,7 +45,7 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: rgba(250, 245, 241, 0.94);
+  background: rgba(250, 245, 241, 0.96);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid rgba(14, 15, 10, 0.1);
@@ -55,36 +55,68 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 70px;
-  max-width: 1200px;
+  height: 68px;
+  max-width: 1440px;
+  width: 100%;
   margin: 0 auto;
   padding: 0 24px;
+  gap: 16px;
+  box-sizing: border-box;
 }
 
 .apollo-nav-left {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
+  min-width: 0;
+  flex: 1;
+}
+
+.apollo-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--color-ink-black);
+  flex-shrink: 0;
 }
 
 .apollo-nav-links-pills {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.apollo-nav-links-pills::-webkit-scrollbar {
+  display: none;
 }
 
 .apollo-nav-pill-link {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
+  gap: 7px;
+  padding: 8px 13px;
   border-radius: 10px;
-  font-size: 0.88rem;
-  font-weight: 400;
-  color: var(--color-ink-black);
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #3d4233;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  line-height: 1;
+}
+
+.apollo-nav-pill-link span {
+  white-space: nowrap;
 }
 
 .apollo-nav-pill-link:hover {
@@ -96,26 +128,50 @@
   background: var(--color-soft-linen);
   color: var(--color-ink-black);
   font-weight: 600;
-  box-shadow: 0 1px 2px rgba(14, 15, 10, 0.04);
-  border: 1px solid rgba(14, 15, 10, 0.1);
-  border-bottom: 2px solid var(--color-chartreuse-spark);
+  box-shadow: 0 1px 2px rgba(14, 15, 10, 0.05);
+  border: 1px solid rgba(14, 15, 10, 0.14);
+  position: relative;
+}
+
+.apollo-nav-pill-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  background: var(--color-chartreuse-spark);
+  border-radius: 2px;
 }
 
 .apollo-nav-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
-.apollo-user-chip {
-  display: flex;
+/* Clickable User Chip Button */
+.apollo-user-chip-btn {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
   background: var(--color-soft-linen);
   border: 1px solid rgba(14, 15, 10, 0.12);
   border-radius: 50px;
-  padding: 5px 14px 5px 6px;
+  padding: 4px 13px 4px 5px;
   box-shadow: 0 1px 2px rgba(14, 15, 10, 0.04);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  outline: none;
+}
+
+.apollo-user-chip-btn:hover {
+  background: var(--color-warm-sand);
+  border-color: rgba(14, 15, 10, 0.22);
 }
 
 .apollo-user-avatar-circle {
@@ -130,6 +186,7 @@
   align-items: center;
   justify-content: center;
   letter-spacing: -0.02em;
+  flex-shrink: 0;
 }
 
 .apollo-user-name {
@@ -137,6 +194,7 @@
   font-weight: 600;
   color: var(--color-ink-black);
   line-height: 1.2;
+  white-space: nowrap;
 }
 
 .apollo-role-tag {
@@ -144,11 +202,12 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  padding: 2px 7px;
+  padding: 1px 6px;
   border-radius: 18px;
   background: #fdf0ed;
   color: var(--color-terracotta-cta);
   border: 1px solid #f8cdc2;
+  white-space: nowrap;
 }
 
 .apollo-role-tag.patient {
@@ -157,25 +216,47 @@
   border-color: #cce3be;
 }
 
+.apollo-role-tag.doctor {
+  background: #f3f0e8;
+  color: var(--color-olive-grove);
+  border-color: #ddd7c7;
+}
+
 .apollo-role-tag.admin {
   background: #fdf0ed;
   color: var(--color-coral-outline);
   border-color: #f8cdc2;
 }
 
+.apollo-user-chip-chevron {
+  color: var(--color-ink-black);
+  opacity: 0.55;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+/* Sign Out Button */
 .apollo-logout-button {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   background: var(--color-soft-linen);
   border: 1px solid rgba(14, 15, 10, 0.12);
   border-radius: 10px;
-  padding: 7px 13px;
-  font-size: 0.82rem;
+  padding: 8px 14px;
+  font-family: var(--font-sans);
+  font-size: 13.5px;
   font-weight: 500;
   color: var(--color-ink-black);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.apollo-logout-button span {
+  white-space: nowrap;
 }
 
 .apollo-logout-button:hover {
