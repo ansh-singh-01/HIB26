@@ -107,12 +107,12 @@ export const LandingPage = () => {
 
   const faqs = [
     {
-      q: 'How does MediConnect ensure patient safety with AI triage?',
-      a: 'MediConnect employs a dual-layer safety architecture. Critical physiologic rule thresholds (such as SpO2 < 90%, extreme tachycardia, or acute chest trauma) immediately trigger hard-coded clinical emergency overrides. Secondary non-critical assessments utilize fine-tuned clinical LLMs (Gemini 1.5) with transparent rationale explanations.'
+      q: 'How does Remedi ensure patient safety with AI triage?',
+      a: 'Remedi employs a dual-layer safety architecture. Critical physiologic rule thresholds (such as SpO2 < 90%, extreme tachycardia, or acute chest trauma) immediately trigger hard-coded clinical emergency overrides. Secondary non-critical assessments utilize fine-tuned clinical LLMs (Gemini 1.5) with transparent rationale explanations.'
     },
     {
-      q: 'Does MediConnect integrate with our hospital existing EHR system?',
-      a: 'Yes. MediConnect natively supports HL7 FHIR standards, Epic Systems, Cerner/Oracle Health, and custom REST/WebSocket feeds. Data bidirectional synchronization ensures referrals and vitals automatically link with patient master indexes.'
+      q: 'Does Remedi integrate with our hospital existing EHR system?',
+      a: 'Yes. Remedi natively supports HL7 FHIR standards, Epic Systems, Cerner/Oracle Health, and custom REST/WebSocket feeds. Data bidirectional synchronization ensures referrals and vitals automatically link with patient master indexes.'
     },
     {
       q: 'How does the dynamic hospital bed routing work in real time?',
@@ -123,25 +123,17 @@ export const LandingPage = () => {
       a: 'We support Bluetooth LE (BLE), cellular IoT monitors, smartwatch health telemetry, and standard clinical bedside monitors via MQTT and WebSockets. Telemetry feeds track SpO2, heart rate, non-invasive blood pressure, and core body temperature.'
     },
     {
-      q: 'Is MediConnect HIPAA and SOC2 Type II compliant?',
+      q: 'Is Remedi HIPAA and SOC2 Type II compliant?',
       a: 'Absolutely. All patient identifiable data is encrypted at rest using AES-256 and in transit via TLS 1.3. We enforce strict role-based access controls (RBAC) across Patients, Triage Nurses, Doctors, and Hospital Admins, complete with immutable audit logs.'
     },
     {
-      q: 'Can regional health authorities deploy MediConnect across multiple independent clinics?',
-      a: 'Yes. MediConnect is designed from the ground up for multi-facility health grids, permitting independent hospitals, rural satellite clinics, and emergency ambulance fleets to federate on a single coordinated grid.'
+      q: 'Can regional health authorities deploy Remedi across multiple independent clinics?',
+      a: 'Yes. Remedi is designed from the ground up for multi-facility health grids, permitting independent hospitals, rural satellite clinics, and emergency ambulance fleets to federate on a single coordinated grid.'
     }
   ];
 
   return (
     <div className="apollo-landing">
-      {/* ===================================================================
-          0. Promotional Announcement Strip (Kindsight Style)
-          =================================================================== */}
-      <div className="kindsight-top-strip">
-        <span className="kindsight-strip-badge">2026 Grid Release</span>
-        <span>Regional AI triage telemetry & real-time bed coordination is now operational.</span>
-      </div>
-
       {/* ===================================================================
           1. Sticky Navigation Bar (Kindsight Editorial Style)
           =================================================================== */}
@@ -857,7 +849,7 @@ export const LandingPage = () => {
 
           <div className="apollo-footer-bottom">
             <div>
-              © 2026 MediConnect AI Inc. All rights reserved.
+              © 2026 Remedi AI Inc. All rights reserved.
             </div>
             <div className="apollo-status-pill">
               <span className="apollo-pulse-dot"></span>

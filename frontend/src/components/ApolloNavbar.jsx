@@ -12,7 +12,7 @@ export const ApolloNavbar = ({ currentPage = 'landing' }) => {
           </div>
           <div className="apollo-brand-text">
             <span className="apollo-brand-name">
-              Medi<span>Connect</span>
+              Re<span>medi</span>
             </span>
             <span className="apollo-brand-tagline">AI Health Grid</span>
           </div>
@@ -47,7 +47,7 @@ export const ApolloNavbar = ({ currentPage = 'landing' }) => {
           {currentPage === 'login' ? (
             <>
               <span className="apollo-nav-hint">
-                New to MediConnect?
+                New to Remedi?
               </span>
               <Link to="/register" className="apollo-btn-primary">
                 Sign Up <ArrowRight size={16} />

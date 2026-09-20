@@ -66,7 +66,7 @@ export const ClinicalAssistant = () => {
       // Set initial greeting
       const initialGreeting = {
         role: 'assistant',
-        content: `Hello! I am your **MediConnect Offline-Resilient Clinical Assistant**.\n\nDescribe your symptoms, disease, or medical concern in plain words (e.g., *"crushing chest pain"*, *"high fever with joint pain"*, *"severe headache and nausea"*, or *"difficulty breathing"*).\n\nI will instantly evaluate your case, calculate triage urgency, provide **immediate what-to-do steps**, and recommend **clinical diagnostics and specialist care**.`,
+        content: `Hello! I am your **Remedi Offline-Resilient Clinical Assistant**.\n\nDescribe your symptoms, disease, or medical concern in plain words (e.g., *"crushing chest pain"*, *"high fever with joint pain"*, *"severe headache and nausea"*, or *"difficulty breathing"*).\n\nI will instantly evaluate your case, calculate triage urgency, provide **immediate what-to-do steps**, and recommend **clinical diagnostics and specialist care**.`,
         structured: {
           condition_name: 'Smart Clinical Triage Grid',
           severity_level: 'MILD',
@@ -359,7 +359,7 @@ export const ClinicalAssistant = () => {
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <h2 style={{ margin: 0, fontSize: '1.35rem', fontWeight: '700', color: '#FAF5F1' }}>
-                  MediConnect Clinical AI Chatbot
+                  Remedi Clinical AI Chatbot
                 </h2>
                 <span style={{
                   background: 'rgba(255, 255, 255, 0.15)',
